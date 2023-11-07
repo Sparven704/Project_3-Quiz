@@ -1,0 +1,35 @@
+﻿@page "/Login"
+@using System.Text.Json;
+@using System.Text;
+@using System.Net;
+@using Blazored.LocalStorage;
+@using project_3_quiz.ViewModels;
+@inject HttpClient _http;
+@inject ILocalStorageService _localStorageService
+@inject NavigationManager _navigationManager
+
+<h3>Login</h3>
+
+@code {
+    LoginVM loginModel = new LoginVM();
+
+    string APIErrorMessage;
+    private async Task LoginAsync()
+    {   
+            var jsonPayload = JsonSerializer.Serialize(loginModel);
+            var requestContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            var response = await _http.PostAsync("api/auth/login", requestContent);
+
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                // Hantera felet
+            }
+            if (response.StatusCode==HttpStatusCode.OK)
+            {
+                var tokenResponse = await response.Content.ReadFromJsonAsync<JwtTokenResponseVM>();
+                await _localStorageService.SetItemAsync<string>("JwtToken", tokenResponse.AccessToken);
+
+                _navigationManager.NavigateTo("/index");
+            }
+    }
+}
