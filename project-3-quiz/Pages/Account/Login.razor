@@ -5,13 +5,13 @@
 @using Blazored.LocalStorage;
 @using project_3_quiz.ViewModels;
 @inject HttpClient _http;
-@inject ILocalStorageService _localStorageService
-@inject NavigationManager _navigationManager
+@inject ILocalStorageService _localStorageService;
+@inject NavigationManager _navigationManager;
 
 <h3>Login</h3>
 
 
-<EditForm Model="loginModel" OnValidSubmit="Login">
+<EditForm Model="loginModel" OnValidSubmit="LoginAsync">
     <DataAnnotationsValidator />
 
     <div class="form-group">
