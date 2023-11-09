@@ -8,6 +8,7 @@ namespace project_3_quiz_api.Models.DBModels
         // Primary Key
         [Key]
         public Guid Id { get; set; }
+        public string Email { get; set; }
 
         // Navigation Properties
         public IEnumerable<ScoreModel> Scores { get; set; }
