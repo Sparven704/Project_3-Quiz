@@ -118,6 +118,8 @@ namespace project_3_quiz_api.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Quizzes");
                 });
 
@@ -132,17 +134,30 @@ namespace project_3_quiz_api.Migrations
                     b.Property<Guid>("QuizId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("QuizzesId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("Score")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("QuizzesId");
+                    b.HasIndex("QuizId");
 
-                    b.ToTable("ScoreModel");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Scores");
+                });
+
+            modelBuilder.Entity("project_3_quiz_api.Models.DBModels.UserModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("project_3_quiz_api.Models.DBModels.QuestionModel", b =>
@@ -172,15 +187,34 @@ namespace project_3_quiz_api.Migrations
                     b.Navigation("Quizzes");
                 });
 
+            modelBuilder.Entity("project_3_quiz_api.Models.DBModels.QuizModel", b =>
+                {
+                    b.HasOne("project_3_quiz_api.Models.DBModels.UserModel", "Users")
+                        .WithMany("Quizzes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("project_3_quiz_api.Models.DBModels.ScoreModel", b =>
                 {
                     b.HasOne("project_3_quiz_api.Models.DBModels.QuizModel", "Quizzes")
                         .WithMany("Scores")
-                        .HasForeignKey("QuizzesId")
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("project_3_quiz_api.Models.DBModels.UserModel", "Users")
+                        .WithMany("Scores")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Quizzes");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("project_3_quiz_api.Models.DBModels.ContentModel", b =>
@@ -196,6 +230,13 @@ namespace project_3_quiz_api.Migrations
             modelBuilder.Entity("project_3_quiz_api.Models.DBModels.QuizModel", b =>
                 {
                     b.Navigation("Questions");
+
+                    b.Navigation("Scores");
+                });
+
+            modelBuilder.Entity("project_3_quiz_api.Models.DBModels.UserModel", b =>
+                {
+                    b.Navigation("Quizzes");
 
                     b.Navigation("Scores");
                 });

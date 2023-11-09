@@ -21,7 +21,7 @@ namespace project_3_quiz_api.Models.DBModels
         public Guid UserId { get; set; }
 
         // Navigation Properties
-        //public virtual UserModel Users { get; set; }
+        public virtual UserModel Users { get; set; }
         public virtual IEnumerable<QuestionModel> Questions { get; set; }
         public virtual IEnumerable<ScoreModel> Scores { get; set; }
     }

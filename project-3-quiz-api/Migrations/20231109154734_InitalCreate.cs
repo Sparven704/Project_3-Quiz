@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace project_3_quiz_api.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitalCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -41,6 +41,17 @@ namespace project_3_quiz_api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Quizzes",
                 columns: table => new
                 {
@@ -53,6 +64,12 @@ namespace project_3_quiz_api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Quizzes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Quizzes_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -88,26 +105,32 @@ namespace project_3_quiz_api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            //migrationBuilder.CreateTable(
-            //    name: "ScoreModel",
-            //    columns: table => new
-            //    {
-            //        Id = table.Column<int>(type: "int", nullable: false)
-            //            .Annotation("SqlServer:Identity", "1, 1"),
-            //        Score = table.Column<int>(type: "int", nullable: false),
-            //        QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-            //        QuizzesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-            //    },
-            //    constraints: table =>
-            //    {
-            //        table.PrimaryKey("PK_ScoreModel", x => x.Id);
-            //        table.ForeignKey(
-            //            name: "FK_ScoreModel_Quizzes_QuizzesId",
-            //            column: x => x.QuizzesId,
-            //            principalTable: "Quizzes",
-            //            principalColumn: "Id",
-            //            onDelete: ReferentialAction.Cascade);
-            //    });
+            migrationBuilder.CreateTable(
+                name: "Scores",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Score = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Scores", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Scores_Quizzes_QuizId",
+                        column: x => x.QuizId,
+                        principalTable: "Quizzes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Scores_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_ContentId",
@@ -124,10 +147,20 @@ namespace project_3_quiz_api.Migrations
                 table: "Questions",
                 column: "QuizId");
 
-            //migrationBuilder.CreateIndex(
-            //    name: "IX_ScoreModel_QuizzesId",
-            //    table: "ScoreModel",
-            //    column: "QuizzesId");
+            migrationBuilder.CreateIndex(
+                name: "IX_Quizzes_UserId",
+                table: "Quizzes",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Scores_QuizId",
+                table: "Scores",
+                column: "QuizId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Scores_UserId",
+                table: "Scores",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -136,8 +169,8 @@ namespace project_3_quiz_api.Migrations
             migrationBuilder.DropTable(
                 name: "Questions");
 
-            //migrationBuilder.DropTable(
-            //    name: "ScoreModel");
+            migrationBuilder.DropTable(
+                name: "Scores");
 
             migrationBuilder.DropTable(
                 name: "ContentTypes");
@@ -147,6 +180,9 @@ namespace project_3_quiz_api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Quizzes");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }
