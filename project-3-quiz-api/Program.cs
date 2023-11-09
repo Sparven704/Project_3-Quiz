@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using project_3_quiz_api.Data;
+using project_3_quiz_api.Repositories;
 using System.Text;
 
 namespace project_3_quiz_api
@@ -51,6 +52,7 @@ namespace project_3_quiz_api
                     });
             });
 
+            builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(

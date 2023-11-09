@@ -69,9 +69,6 @@ namespace project_3_quiz_api.Controllers
                         };
                         return Ok(response);
                     }
-
-
-
                 }
             }
             return BadRequest("username or password was incorrect");
