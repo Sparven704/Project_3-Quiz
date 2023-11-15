@@ -7,8 +7,23 @@
 
 .MainTitle {
     font-family: Pacifico;
-    text-align:center;
+    text-align: center;
     margin-top: 20px;
+}
+
+.IntroText {
+    font-family: Pacifico;
+    text-align: center;
+    font-size: large;
+}
+
+.HomeLogo {
+    width: 400px;
+    height: 400px;    
+    display: block;
+    margin-top:50px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 html, body {
