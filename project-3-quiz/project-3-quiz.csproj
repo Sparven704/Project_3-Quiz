@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\Images\" />
     <Folder Include="wwwroot\sample-data\" />
   </ItemGroup>
 
