@@ -17,4 +17,8 @@
     <Folder Include="wwwroot\sample-data\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\Images\choose.png" />
+  </ItemGroup>
+
 </Project>
