@@ -1,0 +1,109 @@
+﻿@page "/createquestion"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@using project_3_quiz.ViewModels
+
+
+@if (submitting)
+{
+    <p>Submitting...</p>
+}
+else
+{
+    <div class="create">
+        <div class="container">
+            <div class="intro">
+                <h2 class="text-center">Create questions for your new quiz!</h2>
+                <p class="text-center">After you have created the question you create 4 options for answers</p>
+            </div>
+
+            <form class="form-inline" method="post" @onsubmit="CreateQuestionFunction">
+                @*-----Question-----*@
+                <div class="form-group">
+                    <input class="form-control mx-auto" type="text" id="Question" @bind="@question.Question" placeholder="Question" style="max-width: 600px;">
+                </div>
+                @*-----Answer-----*@
+                <div class="form-group">
+                    <input class="form-control mx-auto" type="text" id="Answer" @bind="@question.Answer" placeholder="Answer" style="max-width: 600px;">
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Create Question</button>
+                </div>
+            </form>
+
+            <div class="intro">
+                <h2 class="text-center">Now after having created the question you create 4 options for answers!</h2>
+                <p class="text-center">One of the options must match the answer</p>
+            </div>
+            @*-----Options-----*@
+            <form class="form-inline" method="post" @onsubmit="CreateOptionForQuestion">
+                <div class="form-group">
+                    <input class="form-control mx-auto" type="text" id="Option1" @bind="@option1.Text" placeholder="Possible Answer" style="max-width: 600px;">
+                </div>
+                <div class="form-group">
+                    <input class="form-control mx-auto" type="text" id="Option2" @bind="@option2.Text" placeholder="Possible Answer" style="max-width: 600px;">
+                </div>
+                <div class="form-group">
+                    <input class="form-control mx-auto" type="text" id="Option3" @bind="@option3.Text" placeholder="Possible Answer" style="max-width: 600px;">
+                </div>
+                <div class="form-group">
+                    <input class="form-control mx-auto" type="text" id="Option4" @bind="@option4.Text" placeholder="Possible Answer" style="max-width: 600px;">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Lock in options</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+}
+
+@code {
+    private QuestionVM question = new QuestionVM();
+    private OptionVM option1 = new OptionVM();
+    private OptionVM option2 = new OptionVM();
+    private OptionVM option3 = new OptionVM();
+    private OptionVM option4 = new OptionVM();
+    private bool submitting = false;
+
+
+    private async Task CreateOptionForQuestion()
+    {
+        HttpResponseMessage response1 = await HttpClient.PostAsJsonAsync("api/createOption", option1);
+        HttpResponseMessage response2 = await HttpClient.PostAsJsonAsync("api/createOption", option2);
+        HttpResponseMessage response3 = await HttpClient.PostAsJsonAsync("api/createOption", option3);
+        HttpResponseMessage response4 = await HttpClient.PostAsJsonAsync("api/createOption", option4);
+        if (response1.IsSuccessStatusCode && response2.IsSuccessStatusCode && response3.IsSuccessStatusCode && response4.IsSuccessStatusCode)
+        {
+            
+        }
+        else
+        {
+            var errorMessage1 = await response1.Content.ReadAsStringAsync();
+            var errorMessage2 = await response2.Content.ReadAsStringAsync();
+            var errorMessage3 = await response3.Content.ReadAsStringAsync();
+            var errorMessage4 = await response4.Content.ReadAsStringAsync();
+        }
+    }
+
+    private async Task CreateQuestionFunction()
+    {
+        submitting = true;
+
+
+        HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/createQuestion", question);
+
+        if (response.IsSuccessStatusCode)
+        {
+            
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+        }
+
+        submitting = false;
+    }
+}

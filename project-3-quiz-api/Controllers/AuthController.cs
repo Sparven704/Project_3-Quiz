@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using project_3_quiz_api.Data;
+using project_3_quiz_api.Models.DBModels;
 using project_3_quiz_api.Models.DTO;
 using project_3_quiz_api.Repositories;
 
@@ -12,11 +14,13 @@ namespace project_3_quiz_api.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ITokenRepository _tokenRepository;
+        private readonly ApplicationDbContext _context;
 
-        public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenRepository)
+        public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenRepository, ApplicationDbContext applicationDbContext)
         {
             _userManager = userManager;
             _tokenRepository = tokenRepository;
+            _context = applicationDbContext;
         }
 
         //Post: /api/Auth/Register
@@ -33,16 +37,22 @@ namespace project_3_quiz_api.Controllers
             var identityResult = await _userManager.CreateAsync(identityUser, registerRequestDto.Password);
 
             if (identityResult.Succeeded)
-            {
+            { 
                 // add role to this user
                 if (registerRequestDto.Roles != null && registerRequestDto.Roles.Any())
                 {
                     identityResult = await _userManager.AddToRolesAsync(identityUser, registerRequestDto.Roles);
                     if (identityResult.Succeeded)
                     {
+                        var user = new UserModel() 
+                        {
+                            Email = registerRequestDto.Username
+                        };
+
                         return Ok("The user was registered! You can now login");
                     }
                 }
+
             }
             return BadRequest("Sorry, it did not work this time");
         }
