@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using project_3_quiz_api.Repositories.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace project_3_quiz_api.Repositories
+namespace project_3_quiz_api.Repositories.Repository
 {
     public class TokenRepository : ITokenRepository
     {
