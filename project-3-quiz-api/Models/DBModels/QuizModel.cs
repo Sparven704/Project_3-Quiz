@@ -12,7 +12,7 @@ namespace project_3_quiz_api.Models.DBModels
         // Properties
         [NotNull]
         public string Title { get; set; }
-        public DateTime Timelimit { get; set; }
+        public int TimeLimitMin { get; set; }
 
         [NotNull]
         public string Link { get; set; }
@@ -22,7 +22,7 @@ namespace project_3_quiz_api.Models.DBModels
 
         // Navigation Properties
         public virtual UserModel Users { get; set; }
-        public virtual IEnumerable<QuestionModel> Questions { get; set; }
-        public virtual IEnumerable<ScoreModel> Scores { get; set; }
+        public IEnumerable<QuestionModel> Questions { get; set; }
+        public IEnumerable<ScoreModel> Scores { get; set; }
     }
 }

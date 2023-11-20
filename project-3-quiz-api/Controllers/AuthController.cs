@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using project_3_quiz_api.Data;
 using project_3_quiz_api.Models.DBModels;
 using project_3_quiz_api.Models.DTO;
-using project_3_quiz_api.Repositories;
+using project_3_quiz_api.Repositories.Interfaces;
 
 namespace project_3_quiz_api.Controllers
 {
@@ -16,11 +16,12 @@ namespace project_3_quiz_api.Controllers
         private readonly ITokenRepository _tokenRepository;
         private readonly ApplicationDbContext _context;
 
-        public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenRepository, ApplicationDbContext applicationDbContext)
+
+        public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenRepository, ApplicationDbContext context)
         {
             _userManager = userManager;
             _tokenRepository = tokenRepository;
-            _context = applicationDbContext;
+            _context = context;
         }
 
         //Post: /api/Auth/Register
@@ -44,11 +45,14 @@ namespace project_3_quiz_api.Controllers
                     identityResult = await _userManager.AddToRolesAsync(identityUser, registerRequestDto.Roles);
                     if (identityResult.Succeeded)
                     {
-                        var user = new UserModel() 
+                        // Add new user to db
+                        var user = new UserModel
                         {
+                            Id = Guid.NewGuid(),
                             Email = registerRequestDto.Username
                         };
-
+                        await _context.Users.AddAsync(user);
+                        await _context.SaveChangesAsync();
                         return Ok("The user was registered! You can now login");
                     }
                 }

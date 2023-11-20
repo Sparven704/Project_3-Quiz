@@ -6,8 +6,7 @@ namespace project_3_quiz_api.Data
     public class ApplicationDbContext : DbContext
     {
         // Database Tables
-        public DbSet<ContentModel> Contents { get; set; }
-        public DbSet<ContentTypeModel> ContentTypes { get; set; }
+        public DbSet<OptionModel> Options { get; set; }
         public DbSet<QuizModel> Quizzes { get; set; }
         public DbSet<QuestionModel> Questions { get; set; }
         public DbSet<ScoreModel> Scores { get; set; }
@@ -17,21 +16,18 @@ namespace project_3_quiz_api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            // OptionModel
+            modelBuilder.Entity<OptionModel>()
+                .HasOne(c => c.Questions)
+                .WithMany(o => o.Options)
+                .HasForeignKey(c => c.QuestionId);
+
             // QuestionModel
             modelBuilder.Entity<QuestionModel>()
-                .HasOne(q => q.ContentTypes)
-                .WithMany(ct => ct.Questions)
-                .HasForeignKey(q => q.ContentTypeId);
-
-            modelBuilder.Entity<QuestionModel>()
                 .HasOne(q => q.Quizzes)
-                .WithMany(qz => qz.Questions)
-                .HasForeignKey(q => q.QuizId);
-
-            modelBuilder.Entity<QuestionModel>()
-                .HasOne(q => q.Contents)
                 .WithMany(c => c.Questions)
-                .HasForeignKey(q => q.ContentId);
+                .HasForeignKey(q => q.QuizId);
 
             //QuizModel
             modelBuilder.Entity<QuizModel>()

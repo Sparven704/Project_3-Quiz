@@ -8,16 +8,15 @@ namespace project_3_quiz_api.Models.DBModels
         [Key]
         public Guid Id { get; set; }
         // Properties
-        public bool IsCorrect { get; set; }
-
+        public string Question { get; set; }
+        public string Answer { get; set; }
+        public string link { get; set; }
         // Foreign Keys
+        
         public Guid QuizId { get; set; }
-        public Guid ContentTypeId { get; set; }
-        public Guid ContentId { get; set; }
 
         // Navigation Properties
-        public virtual ContentTypeModel ContentTypes { get; set; }
         public virtual QuizModel Quizzes { get; set; }
-        public virtual ContentModel Contents { get; set; }
+        public virtual IEnumerable<OptionModel> Options { get; set; }
     }
 }

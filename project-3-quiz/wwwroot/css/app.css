@@ -1,5 +1,31 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+@font-face {
+    font-family: 'Pacifico', cursive;
+    src: url('../css/open-iconic/font/fonts/Pacifico-Regular.ttf');
+}
+
+.MainTitle {
+    font-family: Pacifico;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.IntroText {
+    font-family: Pacifico;
+    text-align: center;
+    font-size: large;
+}
+
+.HomeLogo {
+    width: 400px;
+    height: 400px;    
+    display: block;
+    margin-top:50px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
