@@ -16,6 +16,7 @@ namespace project_3_quiz_api.Controllers
         private readonly ITokenRepository _tokenRepository;
         private readonly ApplicationDbContext _context;
 
+
         public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenRepository, ApplicationDbContext context)
         {
             _userManager = userManager;
@@ -37,7 +38,7 @@ namespace project_3_quiz_api.Controllers
             var identityResult = await _userManager.CreateAsync(identityUser, registerRequestDto.Password);
 
             if (identityResult.Succeeded)
-            {
+            { 
                 // add role to this user
                 if (registerRequestDto.Roles != null && registerRequestDto.Roles.Any())
                 {
@@ -55,6 +56,7 @@ namespace project_3_quiz_api.Controllers
                         return Ok("The user was registered! You can now login");
                     }
                 }
+
             }
             return BadRequest("Sorry, it did not work this time");
         }

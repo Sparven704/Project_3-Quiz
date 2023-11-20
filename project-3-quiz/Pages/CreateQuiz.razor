@@ -1,0 +1,69 @@
+﻿@page "/createquiz"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@using project_3_quiz.ViewModels
+
+@if (submitting)
+{
+    <p>Submitting...</p>
+}
+else
+{
+    <div class="create">
+        <div class="container">
+            <div class="intro">
+                <h2 class="text-center">Create a new Quiz!</h2>
+                <p class="text-center">Once the quiz is created, you can then make the questions</p>
+            </div>
+
+            <form class="form-inline" method="post" @onsubmit="CreateQuizFunction">
+                <div class="form-group">
+                    <input class="form-control mx-auto" type="text" id="Title" @bind="@quiz.Title" placeholder="Quiz Title" style="max-width: 400px;">
+                </div>
+
+                <div class="form-group">
+                    <label for="Timelimit">Select Time Limit:</label>
+                    <select class="form-control text-center mx-auto" id="Timelimit" @bind="@quiz.Timelimit" placeholder="Time Limit" style="max-width: 400px;">
+                        @for (int i = 15; i <= 120; i += 15)
+                        {
+                            <option value="@i">@($"{i / 60} hr {i % 60} min")</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" disabled="@submitting">Create Quiz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@code {
+    private QuizVM quiz = new QuizVM();
+    private bool submitting = false;
+
+    private async Task CreateQuizFunction()
+    {
+        submitting = true;
+
+        try
+        {
+            HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/createQuiz", quiz);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/createquestion");
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                // Handle the error message as needed
+            }
+        }
+        finally
+        {
+            submitting = false;
+        }
+    }
+}
