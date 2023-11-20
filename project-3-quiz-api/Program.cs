@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using project_3_quiz_api.Data;
-using project_3_quiz_api.Repositories;
+using project_3_quiz_api.Repositories.Interfaces;
+using project_3_quiz_api.Repositories.Repository;
 using System.Text;
 
 namespace project_3_quiz_api
@@ -53,6 +54,11 @@ namespace project_3_quiz_api
             });
 
             builder.Services.AddScoped<ITokenRepository, TokenRepository>();
+            builder.Services.AddScoped<OptionRepository>();
+            builder.Services.AddScoped<QuestionRepository>();
+            builder.Services.AddScoped<QuizRepository>();
+            builder.Services.AddScoped<ScoreRepository>();
+            builder.Services.AddScoped<UserRepository>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(

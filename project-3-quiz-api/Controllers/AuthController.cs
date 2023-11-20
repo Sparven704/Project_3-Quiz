@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using project_3_quiz_api.Data;
 using project_3_quiz_api.Models.DBModels;
 using project_3_quiz_api.Models.DTO;
-using project_3_quiz_api.Repositories;
+using project_3_quiz_api.Repositories.Interfaces;
 
 namespace project_3_quiz_api.Controllers
 {

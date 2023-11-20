@@ -12,7 +12,7 @@ namespace project_3_quiz_api.Models.DBModels
         // Properties
         [NotNull]
         public string Title { get; set; }
-        public DateTime Timelimit { get; set; }
+        public int TimeLimitMin { get; set; }
 
         [NotNull]
         public string Link { get; set; }

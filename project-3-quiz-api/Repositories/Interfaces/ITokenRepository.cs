@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace project_3_quiz_api.Repositories
+namespace project_3_quiz_api.Repositories.Interfaces
 {
     public interface ITokenRepository
     {
