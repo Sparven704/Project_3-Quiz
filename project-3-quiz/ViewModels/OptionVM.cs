@@ -3,6 +3,6 @@
     public class OptionVM
     {
         public string Text { get; set; }
-        public Guid questionId { get; set; }   
+        public bool IsChecked { get; set; }
     }
 }
