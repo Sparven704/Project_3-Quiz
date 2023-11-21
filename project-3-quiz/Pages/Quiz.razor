@@ -1,5 +1,76 @@
-﻿<h3>Quiz</h3>
+﻿@page "/quiz/{quizId}/{quizTitle}"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@using project_3_quiz.ViewModels
+
+<h3>@quizTitle</h3>
+
+<ul>
+    @foreach (var question in questions)
+    {
+        <li>
+            @question.Question
+            @if (question.IsMultipleAnswer)
+            {
+                <ul>
+                    @foreach (var option in question.Options)
+                    {
+                        <li>
+                            <input type="checkbox" @bind="option.IsChecked" disabled="@question.IsAnswerSubmitted" />
+                            @option.Text
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div class="form-group">
+                    <input class="form-control mx-auto" type="text" id="Option" @bind="@question.Options" placeholder="Option" style="max-width: 600px;">
+                </div>
+            }
+
+            <button @onclick="(() => SubmitAnswer(question))" disabled="@question.IsAnswerSubmitted">Submit Answer</button>
+        </li>
+    }
+</ul>
+
 
 @code {
+    // isntead of showing all questions at once show one at a time and on submit answer show next question in an array
+    private string quizId;
+    private string quizTitle;
 
+    protected override void OnInitialized()
+    {
+        // Get the quizId and quizTitle from the route parameters
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var segments = uri.Segments;
+
+        if (segments.Length >= 3)
+        {
+            quizId = segments[segments.Length - 2];
+            quizTitle = segments[segments.Length - 1];
+        }
+    }
+
+    private List<QuestionVM> questions;
+    private List<OptionVM> optionsForQuestion;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = $"/getQuestions/{quizId}";
+        var response = await HttpClient.GetFromJsonAsync<List<QuestionVM>>(url);
+        questions = response;
+
+        
+    }
+    private void SubmitAnswer(QuestionVM question)
+    {
+        question.IsAnswerSubmitted = true;
+
+        foreach (var option in question.Options)
+        {
+            option.IsChecked = false;
+        }
+    }
 }

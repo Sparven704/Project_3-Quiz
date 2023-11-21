@@ -1,0 +1,32 @@
+﻿@page "/quizlist"
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@using project_3_quiz.ViewModels
+@using System.Net.Http.Json
+
+<h3>Quiz List</h3>
+
+<ul>
+    @foreach (var quiz in quizzes)
+    {
+        <li>
+            @quiz.Title
+            <button @onclick="(() => JoinQuiz(quiz.Id, quiz.Title))">Join</button>
+        </li>
+    }
+</ul>
+
+@code {
+    private List<QuizVM> quizzes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await HttpClient.GetFromJsonAsync<List<QuizVM>>("/getAllQuizzes");
+        quizzes = response;
+    }
+
+    private void JoinQuiz(Guid quizId, string quizTitle)
+    {
+        NavigationManager.NavigateTo($"/quiz/{quizId}/{quizTitle}");
+    }
+}
