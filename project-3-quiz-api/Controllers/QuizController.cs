@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using project_3_quiz_api.Models.DBModels;
 using project_3_quiz_api.Models.DTO;
@@ -80,14 +78,25 @@ namespace project_3_quiz_api.Controllers
             try
             {
                 var querry = await _quizRepository.GetByConditionAsync(q => q.UserId == userId);
-                if(querry is null)
+                if (querry is null)
                     return NotFound();
 
                 List<QuizModel> userQuizzes = querry.ToList();
-                if(userQuizzes.IsNullOrEmpty())
+                if (userQuizzes.IsNullOrEmpty())
                     return NotFound();
 
-                return Ok(userQuizzes);
+                List<FetchQuizByUserIdResponseDto> response = new();
+                foreach (var quiz in userQuizzes)
+                {
+                    response.Add(new FetchQuizByUserIdResponseDto()
+                    {
+                        Title = quiz.Title,
+                        TimeLimitMin = quiz.TimeLimitMin,
+                        Link = quiz.Link
+                    });
+                }
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -156,6 +165,6 @@ namespace project_3_quiz_api.Controllers
 
             return BadRequest();
         }
-        
+
     }
 }
