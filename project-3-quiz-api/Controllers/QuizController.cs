@@ -60,8 +60,13 @@ namespace project_3_quiz_api.Controllers
                 if (quiz is null)
                     return StatusCode(500); // Should never happen
 
+                var responseDto = new FetchQuizResponseDto()
+                {
+                    Title = quiz.Title,
+                    TimeLimitMin = quiz.TimeLimitMin
+                };
 
-                return Ok(quiz);
+                return Ok(responseDto);
             }
             catch (Exception ex)
             {

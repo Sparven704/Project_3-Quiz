@@ -49,12 +49,6 @@ namespace project_3_quiz_api.Migrations
                 name: "IsCorrect",
                 table: "Questions");
 
-            migrationBuilder.AddColumn<Guid>(
-                name: "OptionModelId",
-                table: "Quizzes",
-                type: "uniqueidentifier",
-                nullable: true);
-
             migrationBuilder.AddColumn<int>(
                 name: "TimeLimitMin",
                 table: "Quizzes",
@@ -103,21 +97,9 @@ namespace project_3_quiz_api.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Quizzes_OptionModelId",
-                table: "Quizzes",
-                column: "OptionModelId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Options_QuestionId",
                 table: "Options",
                 column: "QuestionId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Quizzes_Options_OptionModelId",
-                table: "Quizzes",
-                column: "OptionModelId",
-                principalTable: "Options",
-                principalColumn: "Id");
         }
 
         /// <inheritdoc />
