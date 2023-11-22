@@ -12,6 +12,8 @@ namespace project_3_quiz_api.Models.DBModels
         // Properties
         [NotNull]
         public string Title { get; set; }
+        [NotNull]
+        public string NormalizedTitle { get; set; }
         public int TimeLimitMin { get; set; }
 
         [NotNull]

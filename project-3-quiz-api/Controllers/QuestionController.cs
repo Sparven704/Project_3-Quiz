@@ -33,22 +33,26 @@ namespace project_3_quiz_api.Controllers
                     Question = requestDto.Question,
                     Answer = requestDto.Answer,
                     link = requestDto.Link,
-                    QuizId = requestDto.QuizId
+                    QuizId = requestDto.QuizId,
+                    IsMultipleAnswer = requestDto.IsMultipleAnswer
                 };
 
                 await _questionRepository.CreateAsync(newQuestion);
 
-                foreach (var option in requestDto.Options)
+                if (newQuestion.IsMultipleAnswer is true)
                 {
-                    OptionModel newOption = new()
+                    foreach (var option in requestDto.Options)
                     {
-                        Id = Guid.NewGuid(),
-                        Text = option,
-                        QuestionId = newQuestion.Id
-                    };
-                    await _optionRepository.CreateAsync(newOption);
+                        OptionModel newOption = new()
+                        {
+                            Id = Guid.NewGuid(),
+                            Text = option,
+                            QuestionId = newQuestion.Id
+                        };
+                        await _optionRepository.CreateAsync(newOption);
+                    }
                 }
-
+                
                 await _questionRepository.SaveAsync();
 
                 return Ok();
@@ -77,21 +81,34 @@ namespace project_3_quiz_api.Controllers
                 List<FetchQuizQuestionsResponseDto> fetchQuizQuestionsResponseDto = new();
                 foreach (var question in querryResult)
                 {
-                    var optionQuerry = await _optionRepository.GetByConditionAsync(o => o.QuestionId == question.Id);
-                    if (optionQuerry is null)
-                        return NotFound();
-
-                    List<OptionModel>? optionQuerryResult = optionQuerry.ToList();
-                    if (optionQuerryResult.IsNullOrEmpty())
-                        return NotFound();
-
-                    fetchQuizQuestionsResponseDto.Add(new FetchQuizQuestionsResponseDto()
+                    if (question.IsMultipleAnswer is true)
                     {
-                        Question = question.Question,
-                        Answer = question.Answer,
-                        Link = question.link,
-                        Options = optionQuerryResult.Select(o => o.Text).ToArray()
-                    });
+                        var optionQuerry = await _optionRepository.GetByConditionAsync(o => o.QuestionId == question.Id);
+                        if (optionQuerry is null)
+                            return NotFound();
+
+                        List<OptionModel> optionQuerryResult = optionQuerry.ToList();
+                        if (optionQuerryResult.IsNullOrEmpty())
+                            return NotFound();
+
+                        fetchQuizQuestionsResponseDto.Add(new FetchQuizQuestionsResponseDto()
+                        {
+                            Question = question.Question,
+                            Answer = question.Answer,
+                            Link = question.link,
+                            Options = optionQuerryResult.Select(o => o.Text).ToArray()
+                        });
+                    }
+                    else
+                    {
+                        fetchQuizQuestionsResponseDto.Add(new FetchQuizQuestionsResponseDto()
+                        {
+                            Question = question.Question,
+                            Answer = question.Answer,
+                            Link = question.link,
+                            Options = null
+                        });
+                    }
                 }
 
                 return Ok(fetchQuizQuestionsResponseDto);
@@ -123,9 +140,6 @@ namespace project_3_quiz_api.Controllers
                     return BadRequest();
 
                 var optionsToDelete = optionsQuerry.ToArray();
-                if (optionsToDelete.IsNullOrEmpty())
-                    return NotFound();
-
                 foreach (var option in optionsToDelete)
                 {
                     if (option is not null)
@@ -133,7 +147,6 @@ namespace project_3_quiz_api.Controllers
                         _optionRepository.Delete(option);
                     }
                 }
-
                 _questionRepository.Delete(questionToDelete);
 
                 await _questionRepository.SaveAsync();
@@ -144,10 +157,8 @@ namespace project_3_quiz_api.Controllers
             {
                 Console.WriteLine(ex.Message);
             }
-
             return BadRequest();
         }
-
 
     }
 }
