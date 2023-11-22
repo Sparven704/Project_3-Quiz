@@ -4,5 +4,6 @@
     {
         public string Title { get; set; }
         public int TimeLimitMin { get; set; }
+        public Guid QuizId { get; set; }
     }
 }
