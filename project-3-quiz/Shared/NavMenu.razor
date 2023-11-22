@@ -31,11 +31,11 @@
             </form>
         </ul>
         
-        @* <ul class="navbar-nav">
-            @if (await AuthService.IsUserLoggedIn())
+        <ul class="navbar-nav">
+            @if (isLoggedIn)
             {
                 <li class="nav-item">
-                    <span class="nav-link">Welcome, @(await AuthService.GetUsername())!</span>
+                    <span class="nav-link">Welcome, @username!</span>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" @onclick="LogoutAsync">Logout</a>
@@ -50,7 +50,7 @@
                     <a class="nav-link" href="/register">Register</a>
                 </li>
             }
-        </ul> *@
+        </ul>
 
     </div>
 </nav>
@@ -60,10 +60,21 @@
 
 
 @code {
+    private bool isLoggedIn;
+    private string username;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoggedIn = await AuthService.IsUserLoggedIn();
+        if (isLoggedIn)
+        {
+            username = await AuthService.GetUsername();
+        }
+    }
+
     private async Task LogoutAsync()
     {
         await AuthService.Logout();
-        // Optionally, redirect the user to the login page or perform other actions
         NavigationManager.NavigateTo("/login");
     }
 }

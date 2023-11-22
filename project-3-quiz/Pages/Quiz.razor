@@ -1,44 +1,51 @@
-﻿@page "/quiz/{quizId}/{quizTitle}"
+﻿@page "/quiz/{quizLink}/{quizTitle}"
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @using project_3_quiz.ViewModels
 
 <h3>@quizTitle</h3>
 
-<ul>
-    @foreach (var question in questions)
+@if (questions != null && questions.Count > 0)
+{
+    <div>
+        <p>Question @currentIndex + 1 of @questions.Count</p>
+        <p>@questions[currentIndex].Question</p>
+
+        @if (questions[currentIndex].IsMultipleAnswer)
+        {
+            <ul>
+                @foreach (var option in questions[currentIndex].Options)
+                {
+                    <li>
+                        <input type="checkbox" @bind="option.IsChecked" disabled="@questions[currentIndex].IsAnswerSubmitted" />
+                        @option.Text
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="form-group">
+                <input class="form-control mx-auto" type="text" id="Option" @bind="@questions[currentIndex].Options[0].SingleOption" placeholder="Answer" style="max-width: 600px;">
+            </div>
+        }
+
+        <button @onclick="(() => SubmitAnswer())" disabled="@questions[currentIndex].IsAnswerSubmitted">Submit Answer</button>
+    </div>
+    @if (currentIndex >= questions.Count)
     {
-        <li>
-            @question.Question
-            @if (question.IsMultipleAnswer)
-            {
-                <ul>
-                    @foreach (var option in question.Options)
-                    {
-                        <li>
-                            <input type="checkbox" @bind="option.IsChecked" disabled="@question.IsAnswerSubmitted" />
-                            @option.Text
-                        </li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <div class="form-group">
-                    <input class="form-control mx-auto" type="text" id="Option" @bind="@question.Options" placeholder="Option" style="max-width: 600px;">
-                </div>
-            }
-
-            <button @onclick="(() => SubmitAnswer(question))" disabled="@question.IsAnswerSubmitted">Submit Answer</button>
-        </li>
+        <div>
+            <p>Your total score on the quiz was @totalScore</p>
+        </div>
     }
-</ul>
-
+}
 
 @code {
-    // isntead of showing all questions at once show one at a time and on submit answer show next question in an array
-    private string quizId;
+    private string quizLink;
     private string quizTitle;
+    private int currentIndex = 0;
+    private int totalScore = 0;
+
 
     protected override void OnInitialized()
     {
@@ -48,29 +55,75 @@
 
         if (segments.Length >= 3)
         {
-            quizId = segments[segments.Length - 2];
+            quizLink = segments[segments.Length - 2];
             quizTitle = segments[segments.Length - 1];
         }
     }
 
     private List<QuestionVM> questions;
-    private List<OptionVM> optionsForQuestion;
 
     protected override async Task OnInitializedAsync()
     {
-        var url = $"/getQuestions/{quizId}";
+        var url = $"api/question/{quizLink}";
         var response = await HttpClient.GetFromJsonAsync<List<QuestionVM>>(url);
+
         questions = response;
 
-        
-    }
-    private void SubmitAnswer(QuestionVM question)
-    {
-        question.IsAnswerSubmitted = true;
-
-        foreach (var option in question.Options)
+        foreach (var question in questions)
         {
-            option.IsChecked = false;
+            foreach (var option in question.Options)
+            {
+                // Set IsCorrect based on whether the option is in the CorrectOptions list
+                option.IsCorrect = question.Answer.Contains(option.Text);
+            }
+        }
+    }
+    private int CalculateScore()
+    {
+        int score = 0;
+
+        foreach (var question in questions)
+        {
+            if (question.IsMultipleAnswer)
+            {
+                // For multiple-choice questions, check if the correct option is selected
+                bool isCorrect = question.Options.All(option => option.IsChecked == option.IsCorrect);
+                if (isCorrect)
+                {
+                    score++;
+                }
+            }
+            else
+            {
+                // For text-based questions, compare the submitted answer with the correct answer
+                if (question.Options[0].SingleOption.Equals(question.Answer, StringComparison.OrdinalIgnoreCase))
+                {
+                    score++;
+                }
+            }
+        }
+
+        return score;
+    }
+    private void SubmitAnswer()
+    {
+        questions[currentIndex].IsAnswerSubmitted = true;
+
+        // Reset checkboxes for multiple-choice questions
+        if (questions[currentIndex].IsMultipleAnswer)
+        {
+            foreach (var option in questions[currentIndex].Options)
+            {
+                option.IsChecked = false;
+            }
+        }
+
+        currentIndex++;
+
+        // Check if there are more questions and gives total score if all questions have been answered
+        if (currentIndex >= questions.Count)
+        {
+            totalScore = CalculateScore();
         }
     }
 }

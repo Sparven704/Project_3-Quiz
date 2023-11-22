@@ -51,6 +51,8 @@ else
                     </div>
                 }
                 
+
+                
                 @*-----Button-----*@
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">Create Question</button>
@@ -93,7 +95,7 @@ else
             option4.Text
         };
 
-        HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/createQuestion", question);
+        HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/question/create", question);
 
         if (response.IsSuccessStatusCode)
         {
