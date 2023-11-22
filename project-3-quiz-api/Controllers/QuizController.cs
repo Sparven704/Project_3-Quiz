@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using project_3_quiz_api.Models.DBModels;
 using project_3_quiz_api.Models.DTO;
 using project_3_quiz_api.Repositories.Repository;
@@ -61,14 +60,86 @@ namespace project_3_quiz_api.Controllers
                 if (quiz is null)
                     return StatusCode(500); // Should never happen
 
+                var responseDto = new FetchQuizResponseDto()
+                {
+                    Title = quiz.Title,
+                    TimeLimitMin = quiz.TimeLimitMin
+                };
 
-                return Ok(quiz);
+                return Ok(responseDto);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
 
+            return BadRequest();
+        }
+
+        // Fetch quizzes by userId
+        [HttpPost("user/{userId}")]
+        public async Task<IActionResult> FetchQuizByUserId(Guid userId)
+        {
+            try
+            {
+                var querry = await _quizRepository.GetByConditionAsync(q => q.UserId == userId);
+                if (querry is null)
+                    return NotFound();
+
+                List<QuizModel> userQuizzes = querry.ToList();
+                if (userQuizzes.IsNullOrEmpty())
+                    return NotFound();
+
+                List<FetchQuizByUserIdResponseDto> response = new();
+                foreach (var quiz in userQuizzes)
+                {
+                    response.Add(new FetchQuizByUserIdResponseDto()
+                    {
+                        Title = quiz.Title,
+                        TimeLimitMin = quiz.TimeLimitMin,
+                        Link = quiz.Link
+                    });
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return BadRequest();
+        }
+
+        // Fetch all quizz titles and links
+        [HttpGet("all")]
+        public async Task<IActionResult> FetchAllQuizzes()
+        {
+            try
+            {
+                var querry = await _quizRepository.GetAllAsync();
+                if (querry is null)
+                    return NotFound();
+
+                List<QuizModel> quizzes = querry.ToList();
+                if (quizzes.IsNullOrEmpty())
+                    return NotFound();
+
+                List<FetchAllQuizzesResponseDto> fetchAllQuizzesResponseDto = new();
+                foreach (var quiz in quizzes)
+                {
+                    fetchAllQuizzesResponseDto.Add(new FetchAllQuizzesResponseDto()
+                    {
+                        Title = quiz.Title,
+                        Link = quiz.Link
+                    });
+                }
+
+                return Ok(fetchAllQuizzesResponseDto);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             return BadRequest();
         }
 
