@@ -11,7 +11,7 @@
     {
         <li>
             @quiz.Title
-            <button @onclick="(() => JoinQuiz(quiz.Id, quiz.Title))">Join</button>
+            <button @onclick="(() => JoinQuiz(quiz.Link, quiz.Title))">Join</button>
         </li>
     }
 </ul>
@@ -21,12 +21,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await HttpClient.GetFromJsonAsync<List<QuizVM>>("/getAllQuizzes");
+        var response = await HttpClient.GetFromJsonAsync<List<QuizVM>>("api/quiz/all");
         quizzes = response;
     }
 
-    private void JoinQuiz(Guid quizId, string quizTitle)
+    private void JoinQuiz(string quizLink, string quizTitle)
     {
-        NavigationManager.NavigateTo($"/quiz/{quizId}/{quizTitle}");
+        NavigationManager.NavigateTo($"/quiz/{quizLink}/{quizTitle}");
     }
 }

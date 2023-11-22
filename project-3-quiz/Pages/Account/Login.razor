@@ -8,24 +8,32 @@
 @inject ILocalStorageService _localStorageService;
 @inject NavigationManager _navigationManager;
 
-<h3>Login</h3>
+<div class="d-flex justify-content-center">
+    <h3>Login</h3>
+</div>
 
 
-<EditForm Model="loginModel" OnValidSubmit="LoginAsync">
-    <DataAnnotationsValidator />
+<div class="d-flex justify-content-center" style="height: 100vh;">
+    
+    <EditForm Model="loginModel" OnValidSubmit="LoginAsync" class="text-center" style="max-width: 600px;">
 
-    <div class="form-group">
-        <label for="username">Username</label>
-        <InputText id="username" @bind-Value="loginModel.Username" class="form-control" />
-    </div>
+        <DataAnnotationsValidator />
 
-    <div class="form-group">
-        <label for="password">Password</label>
-        <InputText id="password" @bind-Value="loginModel.Password" class="form-control" type="password" />
-    </div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <InputText id="username" @bind-Value="loginModel.Username" class="form-control" />
+        </div>
 
-    <button type="submit" class="btn btn-primary">Login</button>
-</EditForm>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <InputText id="password" @bind-Value="loginModel.Password" class="form-control" type="password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Login</button>
+
+    </EditForm>
+</div>
+
 
 @code {
     LoginVM loginModel = new LoginVM();
