@@ -7,7 +7,7 @@ namespace project_3_quiz_api.Models.DBModels
     {
         //Primary key
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         //Properties
         [NotNull]
