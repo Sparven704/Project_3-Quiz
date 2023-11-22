@@ -49,7 +49,7 @@ else
 
         try
         {
-            HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/createQuiz", quiz);
+            HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/quiz/create", quiz);
 
             if (response.IsSuccessStatusCode)
             {

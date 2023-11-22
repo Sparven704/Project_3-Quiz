@@ -8,6 +8,6 @@
         public string Answer { get; set; }
         public bool IsAnswerSubmitted { get; set; }
         public bool IsMultipleAnswer { get; set; }
-        public virtual IEnumerable<OptionVM> Options { get; set; }
+        public List<OptionVM> Options { get; set; }
     }
 }

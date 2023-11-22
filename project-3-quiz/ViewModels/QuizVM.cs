@@ -2,7 +2,7 @@
 {
     public class QuizVM
     {
-        public Guid Id { get; set; }
+        public string Link { get; set; }
         public string Title { get; set; }
         public int Timelimit { get; set; }
     }
