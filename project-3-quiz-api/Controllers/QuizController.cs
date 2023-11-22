@@ -31,7 +31,8 @@ namespace project_3_quiz_api.Controllers
                     Title = requestDto.Title,
                     TimeLimitMin = requestDto.TimeLimitMin,
                     Link = Guid.NewGuid().ToString(),
-                    UserId = requestDto.UserId
+                    UserId = requestDto.UserId,
+                    NormalizedTitle = requestDto.Title.ToUpper()
                 };
 
                 await _quizRepository.CreateAsync(newQuiz);
@@ -47,7 +48,7 @@ namespace project_3_quiz_api.Controllers
         }
 
         // Gets a quiz by Link
-        [HttpPost("{link}")]
+        [HttpPost("link/{link}")]
         public async Task<IActionResult> FetchQuiz(string link)
         {
             try
@@ -143,6 +144,36 @@ namespace project_3_quiz_api.Controllers
             return BadRequest();
         }
 
+        [HttpPost("title/{title}")]
+        public async Task<IActionResult> FetchQuizByTitle(string title)
+        {
+            try
+            {
+                var querry = await _quizRepository.GetByConditionAsync(q => q.NormalizedTitle == title.ToUpper());
+                if (querry is null)
+                    return NotFound();
+
+                var quiz = querry.Single();
+                if (quiz is null)
+                    return StatusCode(500); // Should never happen
+
+                var responseDto = new FetchQuizByTitleResponseDto
+                {
+                    Title = quiz.Title,
+                    Link = quiz.Link,
+                    TimeLimitMin = quiz.TimeLimitMin
+                };
+
+                return Ok(responseDto);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return BadRequest();
+        }
+
         // Delete quiz by Id 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteQuiz(Guid id)
@@ -170,6 +201,8 @@ namespace project_3_quiz_api.Controllers
 
             return BadRequest();
         }
+
+        
 
     }
 }

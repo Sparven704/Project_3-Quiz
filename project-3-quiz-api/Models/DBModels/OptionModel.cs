@@ -13,7 +13,6 @@
 
         //Navigation properties
         public virtual QuestionModel Questions { get; set; }
-        public IEnumerable<QuizModel> Quizzes { get; set; }
 
     }
 }
