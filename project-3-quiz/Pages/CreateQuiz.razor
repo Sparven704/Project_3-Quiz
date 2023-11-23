@@ -40,14 +40,17 @@ else
             </form>
         </div>
     </div>
-
+    
     <CreateQuestion quizId="@quizId" />
+    
 }
 
 @code {
     private QuizVM quiz = new QuizVM();
     private bool submitting = false;
     private string quizId;
+    // private bool submitted = false;
+
     private async Task CreateQuizFunction()
     {
         submitting = true;
@@ -74,6 +77,7 @@ else
             {
                 quizId = test.QuizId;
 
+                // submitted = true;
                 NavigationManager.NavigateTo($"/createquestion/{quizId}");
             }
             else
