@@ -1,4 +1,4 @@
-﻿@page "/quiz/{quizLink}/{quizTitle}"
+﻿@page "/quiz/{quizId}/{quizTitle}"
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @using project_3_quiz.ViewModels
@@ -41,7 +41,7 @@
 }
 
 @code {
-    private string quizLink;
+    private string quizId;
     private string quizTitle;
     private int currentIndex = 0;
     private int totalScore = 0;
@@ -55,7 +55,7 @@
 
         if (segments.Length >= 3)
         {
-            quizLink = segments[segments.Length - 2];
+            quizId = segments[segments.Length - 2];
             quizTitle = segments[segments.Length - 1];
         }
     }
@@ -64,7 +64,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var url = $"api/question/{quizLink}";
+        var url = $"https://localhost:7060/api/question/{quizId}";
         var response = await HttpClient.GetFromJsonAsync<List<QuestionVM>>(url);
 
         questions = response;

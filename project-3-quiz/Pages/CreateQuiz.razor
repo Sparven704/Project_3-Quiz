@@ -1,6 +1,9 @@
 ﻿@page "/createquiz"
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
+@inject ILocalStorageService _localStorageService;
+@using Blazored.LocalStorage;
+@using Newtonsoft.Json;
 @using project_3_quiz.ViewModels
 
 @if (submitting)
@@ -47,13 +50,29 @@ else
     {
         submitting = true;
 
+        // Get userId from localStorage
+        var jwtToken = await _localStorageService.GetItemAsync<string>("JwtToken");
+
+        CreateQuizRequestDto createQuizRequestDto = new CreateQuizRequestDto()
+        {
+            JwtToken = jwtToken,
+            Title = quiz.Title,
+            TimeLimitMin = quiz.Timelimit
+        };
+
         try
         {
-            HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/quiz/create", quiz);
+            HttpResponseMessage response = await HttpClient.PostAsJsonAsync("https://localhost:7060/api/quiz/create", createQuizRequestDto);
+
+            var test = JsonConvert.DeserializeObject<CreateQuizResponseDto>(response.Content.ReadAsStringAsync().Result);
+
+            //Console.WriteLine(test.QuizId);
 
             if (response.IsSuccessStatusCode)
             {
-                NavigationManager.NavigateTo("/createquestion");
+                var quizId = test.QuizId;
+
+                NavigationManager.NavigateTo($"/createquestion/{quizId}");
             }
             else
             {
