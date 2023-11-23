@@ -1,4 +1,4 @@
-﻿@* @page "/createquestion/{quizId}" *@
+﻿@page "/createquestion/{quizId}"
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @using project_3_quiz.ViewModels
@@ -13,6 +13,8 @@ else
     <div class="create">
         <div class="container">
             <div class="intro">
+                <h3 class="text-center">Quiz Is Created</h3>
+
                 <h2 class="text-center">Create questions for your new quiz!</h2>
                 <p class="text-center">After you have created the question you create 4 options for answers</p>
             </div>
@@ -32,8 +34,15 @@ else
                     <p class="text-center">One of the options must match the answer</p>
                 </div>
                 <div class="form-group">
-                    <button class="btn btn-primary" @onclick="QuestionIsMultipleAnswer"> Multiple answer question</button>
+                    <button type="button" class="btn btn-primary" @onclick="QuestionIsMultipleAnswer"> Multiple answer question</button>
+                    <button type="button" class="btn btn-primary" @onclick="QuestionHasLink"> Video or img link</button>
                 </div>
+                @if (hasLink)
+                {
+                    <div class="form-group">
+                        <input class="form-control mx-auto" type="text" id="Link" @bind="@question.Link" placeholder="Link URL" style="max-width: 600px;">
+                    </div>
+                }
                 @if (question.IsMultipleAnswer)
                 {
                     @*-----Options-----*@
@@ -71,6 +80,8 @@ else
     private OptionVM option3 = new OptionVM();
     private OptionVM option4 = new OptionVM();
     private bool submitting = false;
+    private bool hasLink = false;
+
 
     [Parameter]
     public string quizId { get; set; }
@@ -85,6 +96,17 @@ else
         else
         {
             question.IsMultipleAnswer = true;
+        }
+    }
+    private void QuestionHasLink()
+    {
+        if (hasLink == true)
+        {
+            hasLink = false;
+        }
+        else
+        {
+            hasLink = true;
         }
     }
     private async Task CreateQuestionFunction()

@@ -5,7 +5,7 @@
         public string Question { get; set; }
         public string Answer { get; set; }
         public Guid QuizId { get; set; }
-        public string Link { get; set; }
+        public string? Link { get; set; }
         public bool IsMultipleAnswer { get; set; }
         public string[]? Options { get; set; }
     }
