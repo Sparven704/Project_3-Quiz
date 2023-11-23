@@ -10,7 +10,7 @@ namespace project_3_quiz_api.Models.DBModels
         // Properties
         public string Question { get; set; }
         public string Answer { get; set; }
-        public string link { get; set; }
+        public string? link { get; set; }
         public bool IsMultipleAnswer { get; set; }
         // Foreign Keys
 
