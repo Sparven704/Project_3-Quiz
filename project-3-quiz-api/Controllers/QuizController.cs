@@ -64,7 +64,8 @@ namespace project_3_quiz_api.Controllers
                 var responseDto = new FetchQuizResponseDto()
                 {
                     Title = quiz.Title,
-                    TimeLimitMin = quiz.TimeLimitMin
+                    TimeLimitMin = quiz.TimeLimitMin,
+                    QuizId = quiz.Id
                 };
 
                 return Ok(responseDto);
