@@ -3,6 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using project_3_quiz_api.Models.DBModels;
 using project_3_quiz_api.Models.DTO;
 using project_3_quiz_api.Repositories.Repository;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace project_3_quiz_api.Controllers
 {
@@ -11,10 +14,12 @@ namespace project_3_quiz_api.Controllers
     public class QuizController : ControllerBase
     {
         private readonly QuizRepository _quizRepository;
+        private readonly UserRepository _userRepository;
 
-        public QuizController(QuizRepository quizRepository)
+        public QuizController(QuizRepository quizRepository, UserRepository userRepository)
         {
             _quizRepository = quizRepository;
+            _userRepository = userRepository;
         }
 
         [HttpPost("create")]
@@ -22,8 +27,30 @@ namespace project_3_quiz_api.Controllers
         {
             try
             {
+
                 if (requestDto == null)
                     return BadRequest();
+               
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("rTZGBVT8KfHUgrVh5eZRwnc0zkz1eQmqK8hWDvNd")),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero // Optional: adjust for clock skew
+                };
+
+                ClaimsPrincipal principal;
+                
+                principal = tokenHandler.ValidateToken(requestDto.JwtToken, validationParameters, out _);
+
+                var testClaim = principal.FindFirst(ClaimTypes.Email);
+                // Console.WriteLine(testClaim.Value);
+
+                var user = await _userRepository.GetByConditionAsync(x => x.Email == testClaim.Value);
+                var userId = user.Single().Id;
+
 
                 QuizModel newQuiz = new()
                 {
@@ -31,14 +58,19 @@ namespace project_3_quiz_api.Controllers
                     Title = requestDto.Title,
                     TimeLimitMin = requestDto.TimeLimitMin,
                     Link = Guid.NewGuid().ToString(),
-                    UserId = requestDto.UserId,
+                    UserId = userId,
                     NormalizedTitle = requestDto.Title.ToUpper()
                 };
 
                 await _quizRepository.CreateAsync(newQuiz);
                 await _quizRepository.SaveAsync();
 
-                return Ok();
+                var response = new
+                {
+                    QuizId = newQuiz.Id,
+                };
+
+                return Ok(response);
             }
             catch (Exception ex)
             {

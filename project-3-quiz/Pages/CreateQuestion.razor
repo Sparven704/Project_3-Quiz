@@ -1,4 +1,4 @@
-﻿@page "/createquestion"
+﻿@page "/createquestion/{quizId}"
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @using project_3_quiz.ViewModels
@@ -71,6 +71,22 @@ else
     private OptionVM option3 = new OptionVM();
     private OptionVM option4 = new OptionVM();
     private bool submitting = false;
+    private string quizId;
+
+    protected override void OnInitialized()
+    {
+        // Get the quizId from the route parameters
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var segments = uri.Segments;
+
+        Console.WriteLine($"uri {uri}");
+        Console.WriteLine($"segments {segments}");
+
+        if (segments.Length >= 3)
+        {
+            quizId = segments[segments.Length - 1];
+        }
+    }
 
     private void QuestionIsMultipleAnswer()
     {
@@ -87,6 +103,7 @@ else
     {
         submitting = true;
 
+
         question.Options = new string[]
         {
             option1.Text,
@@ -94,8 +111,8 @@ else
             option3.Text,
             option4.Text
         };
-
-        HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/question/create", question);
+        question.QuizId = Guid.Parse(quizId);
+        HttpResponseMessage response = await HttpClient.PostAsJsonAsync("https://localhost:7060/api/question/create", question);
 
         if (response.IsSuccessStatusCode)
         {

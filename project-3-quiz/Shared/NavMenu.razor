@@ -35,7 +35,7 @@
             @if (isLoggedIn)
             {
                 <li class="nav-item">
-                    <span class="nav-link">Welcome, @username!</span>
+                    <span class="nav-link">Welcome, You are logged in</span>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" @onclick="LogoutAsync">Logout</a>
@@ -62,9 +62,10 @@
 @code {
     private bool isLoggedIn;
     private string username;
-
+    
     protected override async Task OnInitializedAsync()
     {
+
         isLoggedIn = await AuthService.IsUserLoggedIn();
         if (isLoggedIn)
         {

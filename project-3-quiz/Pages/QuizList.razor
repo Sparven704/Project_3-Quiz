@@ -11,7 +11,7 @@
     {
         <li>
             @quiz.Title
-            <button @onclick="(() => JoinQuiz(quiz.Link, quiz.Title))">Join</button>
+            <button @onclick="(() => JoinQuiz(quiz.Id, quiz.Title))">Join</button>
         </li>
     }
 </ul>
@@ -25,8 +25,8 @@
         quizzes = response;
     }
 
-    private void JoinQuiz(string quizLink, string quizTitle)
+    private void JoinQuiz(Guid quizId, string quizTitle)
     {
-        NavigationManager.NavigateTo($"/quiz/{quizLink}/{quizTitle}");
+        NavigationManager.NavigateTo($"/quiz/{quizId}/{quizTitle}");
     }
 }

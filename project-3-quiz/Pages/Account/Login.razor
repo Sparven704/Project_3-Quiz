@@ -40,21 +40,19 @@
 
     string APIErrorMessage;
     private async Task LoginAsync()
-    {   
-            var jsonPayload = JsonSerializer.Serialize(loginModel);
-            var requestContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            var response = await _http.PostAsync("api/auth/login", requestContent);
+    {
+         var response = await _http.PostAsJsonAsync("https://localhost:7060/api/auth/login", loginModel);
 
-            if (response.StatusCode == HttpStatusCode.BadRequest)
-            {
-                // Hantera felet
-            }
-            if (response.StatusCode==HttpStatusCode.OK)
-            {
-                var tokenResponse = await response.Content.ReadFromJsonAsync<JwtTokenResponseVM>();
-                await _localStorageService.SetItemAsync<string>("JwtToken", tokenResponse.AccessToken);
+         if (response.StatusCode == HttpStatusCode.BadRequest)
+         {
+             // Hantera felet
+         }
+         if (response.StatusCode==HttpStatusCode.OK)
+         {
+             var tokenResponse = await response.Content.ReadFromJsonAsync<JwtTokenResponseVM>();
+             await _localStorageService.SetItemAsync<string>("JwtToken", tokenResponse.AccessToken);
 
-                _navigationManager.NavigateTo("/index");
-            }
+             _navigationManager.NavigateTo("/");
+         }
     }
 }

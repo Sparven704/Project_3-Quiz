@@ -46,11 +46,20 @@
 
     private async Task RegisterAsync()
     {
-        
+        string[] role = { "Reader" };
+        RegisterDto registerDto = new RegisterDto()
+        {
+            Username = registrationModel.Username,
+            Password = registrationModel.Password,
+            Roles = role
+        };
 
-        var jsonPayload = JsonSerializer.Serialize(registrationModel);
-        var requestContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-        var response = await _http.PostAsync("api/auth/register", requestContent);
+        var response = await _http.PostAsJsonAsync("https://localhost:7060/api/auth/register", registerDto);
+        //Console.WriteLine(response);
+
+        // var jsonPayload = JsonSerializer.Serialize(registrationModel);
+        // var requestContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+        // var response = await _http.PostAsync("api/auth/register", requestContent);
 
         if (response.StatusCode == HttpStatusCode.BadRequest)
         {
@@ -61,7 +70,7 @@
             var tokenResponse = await response.Content.ReadFromJsonAsync<JwtTokenResponseVM>();
             await _localStorageService.SetItemAsync<string>("JwtToken", tokenResponse.AccessToken);
 
-            _navigationManager.NavigateTo("/index");
+            _navigationManager.NavigateTo("/login");
         }
     }
 }
