@@ -11,21 +11,21 @@
     {
         <li>
             @quiz.Title
-            <button @onclick="(() => JoinQuiz(quiz.Id, quiz.Title))">Join</button>
+            <button @onclick="(() => JoinQuiz(quiz.Link, quiz.Title))">Join</button>
         </li>
     }
 </ul>
 
 @code {
-    private List<QuizVM> quizzes;
+    private List<QuizVM> quizzes = new List<QuizVM>();
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await HttpClient.GetFromJsonAsync<List<QuizVM>>("api/quiz/all");
+        var response = await HttpClient.GetFromJsonAsync<List<QuizVM>>("https://localhost:7060/api/quiz/all");
         quizzes = response;
     }
 
-    private void JoinQuiz(Guid quizId, string quizTitle)
+    private void JoinQuiz(string quizId, string quizTitle)
     {
         NavigationManager.NavigateTo($"/quiz/{quizId}/{quizTitle}");
     }

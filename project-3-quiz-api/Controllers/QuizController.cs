@@ -180,6 +180,7 @@ namespace project_3_quiz_api.Controllers
         [HttpPost("title/{title}")]
         public async Task<IActionResult> FetchQuizByTitle(string title)
         {
+            // Change to return a list insted of single since there can be more than one quiz with the same name
             try
             {
                 var querry = await _quizRepository.GetByConditionAsync(q => q.NormalizedTitle == title.ToUpper());
