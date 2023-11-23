@@ -1,4 +1,4 @@
-﻿@page "/createquestion/{quizId}"
+﻿@* @page "/createquestion/{quizId}" *@
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @using project_3_quiz.ViewModels
@@ -71,11 +71,11 @@ else
     private OptionVM option3 = new OptionVM();
     private OptionVM option4 = new OptionVM();
     private bool submitting = false;
-    
+
     [Parameter]
     public string quizId { get; set; }
 
-    
+
     private void QuestionIsMultipleAnswer()
     {
         if (question.IsMultipleAnswer == true)
@@ -91,14 +91,21 @@ else
     {
         submitting = true;
 
-
-        question.Options = new string[]
+        if (question.IsMultipleAnswer == false)
         {
-            option1.Text,
-            option2.Text,
-            option3.Text,
-            option4.Text
-        };
+            question.Options = null;
+        }
+        else
+        {
+            question.Options = new string[]
+            {
+                option1.Text,
+                option2.Text,
+                option3.Text,
+                option4.Text
+            };
+        }
+        
         question.QuizId = Guid.Parse(quizId);
         HttpResponseMessage response = await HttpClient.PostAsJsonAsync("https://localhost:7060/api/question/create", question);
 
