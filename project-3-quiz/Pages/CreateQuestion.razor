@@ -71,23 +71,11 @@ else
     private OptionVM option3 = new OptionVM();
     private OptionVM option4 = new OptionVM();
     private bool submitting = false;
-    private string quizId;
+    
+    [Parameter]
+    public string quizId { get; set; }
 
-    protected override void OnInitialized()
-    {
-        // Get the quizId from the route parameters
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        var segments = uri.Segments;
-
-        Console.WriteLine($"uri {uri}");
-        Console.WriteLine($"segments {segments}");
-
-        if (segments.Length >= 3)
-        {
-            quizId = segments[segments.Length - 1];
-        }
-    }
-
+    
     private void QuestionIsMultipleAnswer()
     {
         if (question.IsMultipleAnswer == true)
