@@ -180,25 +180,28 @@ namespace project_3_quiz_api.Controllers
         [HttpPost("title/{title}")]
         public async Task<IActionResult> FetchQuizByTitle(string title)
         {
-            // Change to return a list insted of single since there can be more than one quiz with the same name
             try
             {
                 var querry = await _quizRepository.GetByConditionAsync(q => q.NormalizedTitle == title.ToUpper());
                 if (querry is null)
                     return NotFound();
 
-                var quiz = querry.Single();
-                if (quiz is null)
-                    return StatusCode(500); // Should never happen
+                var quizzes = querry.ToArray();
+                if (quizzes.IsNullOrEmpty())
+                    return NotFound(); // Should never happen
 
-                var responseDto = new FetchQuizByTitleResponseDto
+                List<FetchQuizByTitleResponseDto> response = new();
+                foreach (var quiz in quizzes)
                 {
-                    Title = quiz.Title,
-                    Link = quiz.Link,
-                    TimeLimitMin = quiz.TimeLimitMin
-                };
+                    response.Add(new FetchQuizByTitleResponseDto()
+                    {
+                        Title = quiz.Title,
+                        TimeLimitMin = quiz.TimeLimitMin,
+                        Link = quiz.Link
+                    });
+                }
 
-                return Ok(responseDto);
+                return Ok(response);
 
             }
             catch (Exception ex)
