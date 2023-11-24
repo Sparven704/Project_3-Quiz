@@ -6,7 +6,21 @@
 
 <h3>Quiz List</h3>
 
-<ul>
+@* <form class="form-inline my-2 my-lg-0 pr-3">
+    <div class="d-flex">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search Quizzes" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </div>
+</form> *@
+
+<div class="input-group mb-3">
+  <input type="text" class="form-control" @bind="searchValue" placeholder="Search..." aria-label="Search" aria-describedby="basic-addon2">
+  <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" @onclick="Search">Search</button>
+  </div>
+</div>
+
+@* <ul>
     @foreach (var quiz in quizzes)
     {
         <li>
@@ -14,15 +28,22 @@
             <button @onclick="(() => JoinQuiz(quiz.Link, quiz.Title))">Join</button>
         </li>
     }
-</ul>
+</ul> *@
 
 @code {
     private List<QuizVM> quizzes;
+    private string searchValue;
 
     protected override async Task OnInitializedAsync()
     {
         var response = await HttpClient.GetFromJsonAsync<List<QuizVM>>("api/quiz/all");
         quizzes = response;
+    }
+
+    private async Task Search()
+    {
+        var searchQuery = await HttpClient.GetFromJsonAsync<List<QuizVM>>($"api/quiz/title/{searchValue}");
+        quizzes = searchQuery;
     }
 
     private void JoinQuiz(string quizLink, string quizTitle)
