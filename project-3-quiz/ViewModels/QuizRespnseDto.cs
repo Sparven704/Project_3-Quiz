@@ -1,6 +1,6 @@
-﻿namespace project_3_quiz_api.Models.DTO
+﻿namespace project_3_quiz.ViewModels
 {
-    public class FetchQuizQuestionsResponseDto
+    public class QuizRespnseDto
     {
         public string Question { get; set; }
         public string Answer { get; set; }

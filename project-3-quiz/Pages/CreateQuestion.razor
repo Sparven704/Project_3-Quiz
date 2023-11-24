@@ -64,12 +64,23 @@ else
                 
                 @*-----Button-----*@
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Create Question</button>
+                    <button type="submit" class="btn btn-primary" @onclick="LoadQuestions">Create Question</button>
                 </div>
             </form>  
         </div>
     </div>
-
+    <div>
+        @foreach (var question in questions)
+        {
+            <p>---------------------------------------</p>
+            <p>@question.Question</p>
+            <p>@question.Answer</p>
+            @foreach (var option in question.Options)
+            {
+                <p>@option.Text</p>
+            }
+        }
+    </div>
 
 }
 
@@ -81,7 +92,7 @@ else
     private OptionVM option4 = new OptionVM();
     private bool submitting = false;
     private bool hasLink = false;
-
+    private List<QuestionVM> questions;
 
     [Parameter]
     public string quizId { get; set; }
@@ -141,5 +152,13 @@ else
         }
 
         submitting = false;
+    }
+
+    private async Task LoadQuestions()
+    {
+        var url = $"https://localhost:7060/api/question/{quizId}";
+        var response = await HttpClient.GetFromJsonAsync<List<QuestionVM>>(url);
+
+        questions = response;
     }
 }

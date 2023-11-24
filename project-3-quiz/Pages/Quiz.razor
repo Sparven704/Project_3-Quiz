@@ -14,11 +14,11 @@
         @if (questions[currentIndex].IsMultipleAnswer)
         {
             <ul>
-                @foreach (var option in questions[currentIndex].Options)
+                @foreach (var o in questions[currentIndex].Options)
                 {
                     <li>
-                        <input type="checkbox" @bind="option.IsChecked" disabled="@questions[currentIndex].IsAnswerSubmitted" />
-                        @option.Text
+                        <input type="checkbox" @bind="optionVM.IsChecked" disabled="@questions[currentIndex].IsAnswerSubmitted" />
+                        @o
                     </li>
                 }
             </ul>
@@ -26,7 +26,7 @@
         else
         {
             <div class="form-group">
-                <input class="form-control mx-auto" type="text" id="Option" @bind="@questions[currentIndex].Options[0].SingleOption" placeholder="Answer" style="max-width: 600px;">
+                <input class="form-control mx-auto" type="text" id="Option" @bind="@questions[currentIndex].Options[0]" placeholder="Answer" style="max-width: 600px;">
             </div>
         }
 
@@ -41,43 +41,91 @@
 }
 
 @code {
-    private string quizId;
-    private string quizTitle;
+    [Parameter]
+    public string quizId { get; set; }
+    [Parameter]
+    public string quizTitle { get; set; }
     private int currentIndex = 0;
     private int totalScore = 0;
-
-
-    protected override void OnInitialized()
-    {
-        // Get the quizId and quizTitle from the route parameters
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        var segments = uri.Segments;
-
-        if (segments.Length >= 3)
-        {
-            quizId = segments[segments.Length - 2];
-            quizTitle = segments[segments.Length - 1];
-        }
-    }
-
     private List<QuestionVM> questions;
+    private List<OptionVM> optionVM;
+
+
+
 
     protected override async Task OnInitializedAsync()
     {
-        var url = $"https://localhost:7060/api/question/{quizId}";
-        var response = await HttpClient.GetFromJsonAsync<List<QuestionVM>>(url);
+        Guid id = Guid.Parse(quizId);
+        var requestData = new
+        {
+            QuizId = id
+        };
+        var response = await HttpClient.PostAsJsonAsync($"https://localhost:7060/api/question/fetchquizquestions", requestData);
 
-        questions = response;
+        var responseData = await response.Content.ReadFromJsonAsync<List<QuizRespnseDto>>();
+
+        foreach (var question in responseData)
+        {
+            if (question.IsMultipleAnswer is true)
+            {
+                questions.Add(new QuestionVM()
+                    {
+                        Question = question.Question,
+                        Answer = question.Answer,
+                        IsMultipleAnswer = question.IsMultipleAnswer,
+                        Options = question.Options
+                });
+                foreach (var text in question.Options)
+                {
+                    if (text == question.Answer)
+                    {
+                        optionVM.Add(new OptionVM()
+                            {
+                                Text = text,
+                                IsCorrect = true,
+                                IsChecked = false
+                            });
+                    }
+                    else
+                    {
+                        optionVM.Add(new OptionVM()
+                            {
+                                Text = text,
+                                IsChecked = false,
+                                IsCorrect = false
+                            });
+                    }
+                }
+            }
+            else
+            {
+                questions.Add(new QuestionVM()
+                    {
+                        Question = question.Question,
+                        Answer = question.Answer,
+                        IsMultipleAnswer = question.IsMultipleAnswer,
+                        Options = null
+                });
+            }
+            
+        }
+        
+        
 
         foreach (var question in questions)
         {
             foreach (var option in question.Options)
             {
                 // Set IsCorrect based on whether the option is in the CorrectOptions list
-                option.IsCorrect = question.Answer.Contains(option.Text);
+                if (question.Answer == option)
+                {
+                    
+                }
+                option.IsCorrect = question.Answer.Contains(option);
             }
         }
     }
+
     private int CalculateScore()
     {
         int score = 0;
@@ -96,7 +144,7 @@
             else
             {
                 // For text-based questions, compare the submitted answer with the correct answer
-                if (question.Options[0].SingleOption.Equals(question.Answer, StringComparison.OrdinalIgnoreCase))
+                if (question.Options[0].Text.Equals(question.Answer, StringComparison.OrdinalIgnoreCase))
                 {
                     score++;
                 }

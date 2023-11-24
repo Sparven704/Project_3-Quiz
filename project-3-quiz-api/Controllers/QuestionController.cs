@@ -65,12 +65,12 @@ namespace project_3_quiz_api.Controllers
         }
 
         // Fetch questions by quizId
-        [HttpPost("{quizId}")]
-        public async Task<IActionResult> FetchQuizQuestions(Guid quizId)
+        [HttpPost("fetchquizquestions")]
+        public async Task<IActionResult> FetchQuizQuestions([FromBody] FetchQuizQuestionsRequestDto requestDto)
         {
             try
             {
-                var querry = await _questionRepository.GetByConditionAsync(q => q.QuizId == quizId);
+                var querry = await _questionRepository.GetByConditionAsync(q => q.QuizId == requestDto.QuizId);
                 if (querry is null)
                     return NotFound();
 
@@ -96,6 +96,7 @@ namespace project_3_quiz_api.Controllers
                             Question = question.Question,
                             Answer = question.Answer,
                             Link = question.link,
+                            IsMultipleAnswer = true,
                             Options = optionQuerryResult.Select(o => o.Text).ToArray()
                         });
                     }
@@ -106,6 +107,7 @@ namespace project_3_quiz_api.Controllers
                             Question = question.Question,
                             Answer = question.Answer,
                             Link = question.link,
+                            IsMultipleAnswer = false,
                             Options = null
                         });
                     }

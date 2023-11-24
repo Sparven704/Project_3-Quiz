@@ -55,11 +55,6 @@
         };
 
         var response = await _http.PostAsJsonAsync("https://localhost:7060/api/auth/register", registerDto);
-        //Console.WriteLine(response);
-
-        // var jsonPayload = JsonSerializer.Serialize(registrationModel);
-        // var requestContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-        // var response = await _http.PostAsync("api/auth/register", requestContent);
 
         if (response.StatusCode == HttpStatusCode.BadRequest)
         {
@@ -67,8 +62,8 @@
         }
         else if (response.StatusCode == HttpStatusCode.OK)
         {
-            var tokenResponse = await response.Content.ReadFromJsonAsync<JwtTokenResponseVM>();
-            await _localStorageService.SetItemAsync<string>("JwtToken", tokenResponse.AccessToken);
+            //var tokenResponse = await response.Content.ReadFromJsonAsync<JwtTokenResponseVM>();
+            //await _localStorageService.SetItemAsync<string>("JwtToken", tokenResponse.AccessToken);
 
             _navigationManager.NavigateTo("/login");
         }
