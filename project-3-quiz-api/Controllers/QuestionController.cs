@@ -65,7 +65,7 @@ namespace project_3_quiz_api.Controllers
         }
 
         // Fetch questions by quizId
-        [HttpPost("{quizId}")]
+        [HttpGet("{quizId}")]
         public async Task<IActionResult> FetchQuizQuestions(Guid quizId)
         {
             try

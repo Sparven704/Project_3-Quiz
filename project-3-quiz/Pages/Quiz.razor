@@ -7,8 +7,10 @@
 
 @if (questions != null && questions.Count > 0)
 {
+    @if (currentIndex < questions.Count)
+    {
     <div>
-        <p>Question @currentIndex + 1 of @questions.Count</p>
+        <p>Question @(currentIndex + 1) of @questions.Count</p>
         <p>@questions[currentIndex].Question</p>
 
         @if (questions[currentIndex].IsMultipleAnswer)
@@ -25,57 +27,71 @@
         }
         else
         {
+            <!-- Use a textbox for single-answer questions -->
             <div class="form-group">
-                <input class="form-control mx-auto" type="text" id="Option" @bind="@questions[currentIndex].Options[0].SingleOption" placeholder="Answer" style="max-width: 600px;">
+                <input class="form-control mx-auto" type="text" id="Option" @bind="@questions[currentIndex].Options[0].SingleOption" placeholder="Answer" style="max-width: 600px;" />
             </div>
         }
 
         <button @onclick="(() => SubmitAnswer())" disabled="@questions[currentIndex].IsAnswerSubmitted">Submit Answer</button>
     </div>
-    @if (currentIndex >= questions.Count)
+    }
+    @if (currentIndex == questions.Count)
     {
         <div>
             <p>Your total score on the quiz was @totalScore</p>
         </div>
     }
-}
-
+ }
 @code {
-    private string quizId;
-    private string quizTitle;
     private int currentIndex = 0;
     private int totalScore = 0;
-
-
-    protected override void OnInitialized()
-    {
-        // Get the quizId and quizTitle from the route parameters
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        var segments = uri.Segments;
-
-        if (segments.Length >= 3)
-        {
-            quizId = segments[segments.Length - 2];
-            quizTitle = segments[segments.Length - 1];
-        }
-    }
+    [Parameter]
+    public string quizId { get; set; }
+    [Parameter]
+    public string quizTitle { get; set; }
 
     private List<QuestionVM> questions;
 
     protected override async Task OnInitializedAsync()
     {
-        var url = $"https://localhost:7060/api/question/{quizId}";
-        var response = await HttpClient.GetFromJsonAsync<List<QuestionVM>>(url);
-
-        questions = response;
-
-        foreach (var question in questions)
+        try
         {
-            foreach (var option in question.Options)
+            Guid qId = Guid.Parse(quizId);
+            var url = $"https://localhost:7060/api/question/{qId}";
+            var response = await HttpClient.GetFromJsonAsync<List<FetchQuizQuestionsResponseDto>>(url);
+
+            if (response != null)
             {
-                // Set IsCorrect based on whether the option is in the CorrectOptions list
-                option.IsCorrect = question.Answer.Contains(option.Text);
+                questions = response.Select(dto => new QuestionVM
+                {
+                    Question = dto.Question,
+                    IsMultipleAnswer = dto.Options != null,
+                    Options = dto.Options?.Select(option => new OptionVM
+                    {
+                        Text = option,
+                        IsChecked = false
+                    }).ToList() ?? new List<OptionVM> { new OptionVM() },
+                }).ToList();
+
+                
+                foreach (var question in questions)
+                {
+                    foreach (var option in question.Options)
+                    {
+                        // Set IsCorrect based on whether the option is in the CorrectOptions list
+                        option.IsCorrect = question.Answer.Contains(option.Text);
+                    }
+                }
             }
+            else
+            {
+                Console.WriteLine("Error: Unable to fetch quiz questions.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
         }
     }
     private int CalculateScore()
@@ -107,23 +123,27 @@
     }
     private void SubmitAnswer()
     {
-        questions[currentIndex].IsAnswerSubmitted = true;
-
-        // Reset checkboxes for multiple-choice questions
-        if (questions[currentIndex].IsMultipleAnswer)
+        // Check if there are more questions
+        if (currentIndex < questions.Count)
         {
-            foreach (var option in questions[currentIndex].Options)
+            questions[currentIndex].IsAnswerSubmitted = true;
+
+            // Reset checkboxes for multiple-choice questions
+            if (questions[currentIndex].IsMultipleAnswer)
             {
-                option.IsChecked = false;
+                foreach (var option in questions[currentIndex].Options)
+                {
+                    option.IsChecked = false;
+                }
             }
+
+            currentIndex++;
+
+            // If there are more questions, return without calculating the total score
+            return;
         }
 
-        currentIndex++;
-
-        // Check if there are more questions and gives total score if all questions have been answered
-        if (currentIndex >= questions.Count)
-        {
-            totalScore = CalculateScore();
-        }
+        // Calculate the total score when there are no more questions
+        totalScore = CalculateScore();
     }
 }

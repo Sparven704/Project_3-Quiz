@@ -35,7 +35,7 @@
             @if (isLoggedIn)
             {
                 <li class="nav-item">
-                    <span class="nav-link">Welcome, You are logged in</span>
+                    <a class="nav-link" href="/userprofile">Welcome, You are logged in</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" @onclick="LogoutAsync">Logout</a>

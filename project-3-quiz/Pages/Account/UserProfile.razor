@@ -1,0 +1,96 @@
+﻿@page "/userprofile"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService _localStorageService;
+@using Blazored.LocalStorage;
+@using Newtonsoft.Json;
+@using project_3_quiz.ViewModels
+
+<h3>User Profile</h3>
+
+@if (userInfo != null)
+{
+    <div>
+        <p>Welcome, @userInfo.UserName!</p>
+        <p>Email: @userInfo.Email</p>
+
+        @if (userInfo.CreatedQuizzes != null && userInfo.CreatedQuizzes.Any())
+        {
+            <h4>Quizzes Created by You:</h4>
+            <ul>
+                @foreach (var quiz in userInfo.CreatedQuizzes)
+                {
+                    <li>
+                        Quiz Title: @quiz.Title
+                        @if (quiz.Scores != null && quiz.Scores.Any())
+                        {
+                            <ul>
+                                @foreach (var score in quiz.Scores)
+                                {
+                                    <li>
+                                       User: @score.UserId with the score: @score.Score
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No scores available for this quiz.</p>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No quizzes created by you.</p>
+        }
+
+        @if (userInfo.Scores != null && userInfo.Scores.Any())
+        {
+            <h4>Quizzes You've Submitted Scores To:</h4>
+            <ul>
+                @foreach (var score in userInfo.Scores)
+                {
+                    <li>
+                        Quiz ID: @score.QuizId, Score: @score.Score
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No quiz scores submitted by you.</p>
+        }
+    </div>
+}
+
+@code {
+
+    // ToDo List :
+    //   fetch user info using token 
+    //   fetch all quizes that the logged in user has created and show all scores that have been scored on that quiz
+    //   show all the quizes the user has submitted scores too 
+    //   create the necessary endpoints for these requirements
+
+    private UserInfoDto userInfo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+        var jwtToken = await _localStorageService.GetItemAsync<string>("JwtToken");
+
+        var url = $"https://localhost:7060/api/auth/getuserinfo/{jwtToken}";
+        var response = await HttpClient.GetFromJsonAsync<UserInfoDto>(url);
+
+        if (response != null)
+        {
+            userInfo = response;
+        }
+        else
+        {
+            // Handle the case when user information cannot be retrieved
+            Console.WriteLine("Error: Unable to fetch user information.");
+        }
+    }
+}

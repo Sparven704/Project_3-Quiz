@@ -6,5 +6,6 @@
         public string Link { get; set; }
         public string Title { get; set; }
         public int Timelimit { get; set; }
+        public List<ScoreDto> Scores { get; set; }
     }
 }

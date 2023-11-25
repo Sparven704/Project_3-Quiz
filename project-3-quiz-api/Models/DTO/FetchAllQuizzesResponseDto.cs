@@ -3,7 +3,7 @@
     public class FetchAllQuizzesResponseDto
     {
         public string Title { get; set; }
-        public string Link { get; set; }
+        public Guid Id { get; set; }
 
     }
 }

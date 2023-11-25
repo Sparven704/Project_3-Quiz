@@ -164,7 +164,7 @@ namespace project_3_quiz_api.Controllers
                     fetchAllQuizzesResponseDto.Add(new FetchAllQuizzesResponseDto()
                     {
                         Title = quiz.Title,
-                        Link = quiz.Link
+                        Id = quiz.Id
                     });
                 }
 
