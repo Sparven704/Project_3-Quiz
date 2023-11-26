@@ -11,32 +11,17 @@
 @if (userInfo != null)
 {
     <div class="d-flex justify-content-center">
-        <p>Welcome, @userInfo.UserName!</p>
-        <p>Email: @userInfo.Email</p>
+        <p>Welcome, @userInfo.Email!</p>
 
-        @if (userInfo.CreatedQuizzes != null && userInfo.CreatedQuizzes.Any())
+
+        @if (userInfo.QuizTitle != null && userInfo.QuizTitle.Any())
         {
             <h4>Quizzes Created by You:</h4>
             <ul>
-                @foreach (var quiz in userInfo.CreatedQuizzes)
+                @foreach (var quiz in userInfo.QuizTitle)
                 {
                     <li>
-                        Quiz Title: @quiz.Title
-                        @if (quiz.Scores != null && quiz.Scores.Any())
-                        {
-                            <ul>
-                                @foreach (var score in quiz.Scores)
-                                {
-                                    <li>
-                                       User: @score.UserId with the score: @score.Score
-                                    </li>
-                                }
-                            </ul>
-                        }
-                        else
-                        {
-                            <p>No scores available for this quiz.</p>
-                        }
+                        Quiz Title: @quiz
                     </li>
                 }
             </ul>
@@ -44,23 +29,6 @@
         else
         {
             <p>No quizzes created by you.</p>
-        }
-
-        @if (userInfo.Scores != null && userInfo.Scores.Any())
-        {
-            <h4>Quizzes You've Submitted Scores To:</h4>
-            <ul>
-                @foreach (var score in userInfo.Scores)
-                {
-                    <li>
-                        Quiz ID: @score.QuizId, Score: @score.Score
-                    </li>
-                }
-            </ul>
-        }
-        else
-        {
-            <p>No quiz scores submitted by you.</p>
         }
     </div>
 }
@@ -80,7 +48,7 @@
         
         var jwtToken = await _localStorageService.GetItemAsync<string>("JwtToken");
 
-        var url = $"https://localhost:7060/api/auth/getuserinfo/{jwtToken}";
+        var url = $"https://localhost:7060/api/user/profile/{jwtToken}";
         var response = await HttpClient.GetFromJsonAsync<UserInfoDto>(url);
 
         if (response != null)
