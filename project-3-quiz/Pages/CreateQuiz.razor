@@ -26,7 +26,7 @@ else
 
                 <div class="form-group">
                     <label for="Timelimit">Select Time Limit:</label>
-                    <select class="form-control text-center mx-auto" id="Timelimit" @bind="@quiz.Timelimit" placeholder="Time Limit" style="max-width: 400px;">
+                    <select class="form-control text-center mx-auto" id="Timelimit" @bind="@quiz.TimeLimitMin" placeholder="Time Limit" style="max-width: 400px;">
                         @for (int i = 15; i <= 120; i += 15)
                         {
                             <option value="@i">@($"{i / 60} hr {i % 60} min")</option>
@@ -62,7 +62,7 @@ else
         {
             JwtToken = jwtToken,
             Title = quiz.Title,
-            TimeLimitMin = quiz.Timelimit
+            TimeLimitMin = quiz.TimeLimitMin
         };
 
         try
