@@ -82,10 +82,20 @@ namespace project_3_quiz_api.Controllers
                 List<ScoreModel>? leaderboard = query.OrderByDescending(x => x.Score).ToList();
 
                 if (leaderboard.IsNullOrEmpty())
-                    return StatusCode(500);
+                    return NotFound();
+
+                List<LeaderboardScoreDTO> response = new();
+                foreach (var score in leaderboard)
+                {
+                    response.Add(new LeaderboardScoreDTO()
+                    {
+                        Score = score.Score,
+                        UserName = (await _userRepository.GetByConditionAsync(u => u.Id == score.UserId)).Single().Email
+                    });
+                }
 
 
-                return Ok(leaderboard);
+                return Ok(response);
             }
             catch (Exception ex)
             {
