@@ -2,7 +2,7 @@
 {
     public class ScoreDto
     {
-        public Guid UserId { get; set; }
+        public string JwtToken { get; set; }
         public Guid QuizId { get; set; }
         public int Score { get; set; }
     }

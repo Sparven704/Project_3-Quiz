@@ -1,6 +1,9 @@
 ﻿@page "/quiz/{quizId}/{quizTitle}/{quizTimeLimitMin}"
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
+@inject ILocalStorageService _localStorageService;
+@using Blazored.LocalStorage;
+@using Newtonsoft.Json;
 @using project_3_quiz.ViewModels
 
 <h3 class="d-flex justify-content-center">@quizTitle</h3>
@@ -119,6 +122,19 @@
             StateHasChanged(); // Ensure the component re-renders
         }
     }
+    private async Task LogScore()
+    {
+        Guid qId = Guid.Parse(quizId);
+        var jwtToken = await _localStorageService.GetItemAsync<string>("JwtToken");
+        ScoreDto scoreDto = new ScoreDto()
+        {
+            JwtToken = jwtToken,
+            Score = totalScore,
+            QuizId = qId
+        };
+        HttpResponseMessage response = await HttpClient.PostAsJsonAsync("https://localhost:7060/api/score/create", scoreDto);
+
+    }
     private int CalculateScore()
     {
         int score = 0;
@@ -175,5 +191,6 @@
 
         // Calculate the total score when there are no more questions
         totalScore = CalculateScore();
+        LogScore();
     }
 }
