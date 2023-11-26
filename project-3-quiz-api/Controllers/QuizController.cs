@@ -164,7 +164,8 @@ namespace project_3_quiz_api.Controllers
                     fetchAllQuizzesResponseDto.Add(new FetchAllQuizzesResponseDto()
                     {
                         Title = quiz.Title,
-                        Id = quiz.Id
+                        Id = quiz.Id,
+                        TimeLimitMin = quiz.TimeLimitMin
                     });
                 }
 

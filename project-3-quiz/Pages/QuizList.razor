@@ -4,23 +4,26 @@
 @using project_3_quiz.ViewModels
 @using System.Net.Http.Json
 
-<h3>Quiz List</h3>
+<h3 class="d-flex justify-content-center">Quiz List</h3>
+<div class ="d-flex justify-content-center">
+    <ul>
+        @foreach (var quiz in quizzes)
+        {
+            <li>
+                @quiz.Title
+                <button @onclick="(() => JoinQuiz(quiz.Id, quiz.Title,quiz.TimeLimitMin))">Join</button>
 
-<ul>
-    @foreach (var quiz in quizzes)
-    {
-        <li>
-            @quiz.Title
-            <button @onclick="(() => JoinQuiz(quiz.Id, quiz.Title))">Join</button>
+            </li>
+        }
+    </ul>
+</div>
 
-        </li>
-    }
-</ul>
 
 @code {
     private List<QuizVM> quizzes = new List<QuizVM>();
     private string quizId;
     private string quizTitle;
+    private int quizTimeLimitMin;
 
     protected override async Task OnInitializedAsync()
     {
@@ -28,11 +31,12 @@
         quizzes = response;
     }
 
-    private void JoinQuiz(Guid qId, string qTitle)
+    private void JoinQuiz(Guid qId, string qTitle, int qTimeLimit)
     {
         quizId = qId.ToString();
         quizTitle = qTitle;
+        quizTimeLimitMin = qTimeLimit;
 
-        NavigationManager.NavigateTo($"/quiz/{quizId}/{quizTitle}");
+        NavigationManager.NavigateTo($"/quiz/{quizId}/{quizTitle}/{quizTimeLimitMin}");
     }
 }
