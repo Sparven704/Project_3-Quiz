@@ -10,6 +10,8 @@ using System.Text;
 
 namespace project_3_quiz_api.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class ScoreController : Controller
     {
         private readonly ScoreRepository _scoreRepository;
