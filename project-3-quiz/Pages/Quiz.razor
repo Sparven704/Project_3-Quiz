@@ -47,6 +47,27 @@
             <p>Your total score on the quiz was @totalScore</p>
         </div>
     }
+
+    <h3 class="d-flex justify-content-center">Quiz Highscores</h3>
+    <div class="d-flex justify-content-center">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Username</th>
+                    <th scope="col">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var score in scores)
+                {
+                    <tr>
+                        <td>@score.Username</td>
+                        <td>@score.Score</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
  }
 @code {
     private int currentIndex = 0;
@@ -58,9 +79,8 @@
     [Parameter]
     public string quizTimeLimitMin { get; set; }
     private int timeRemaining;
-
-
     private List<QuestionVM> questions;
+    private List<QuizLeaderboardVM> scores;
 
     protected override async Task OnInitializedAsync()
     {
@@ -69,7 +89,7 @@
             Guid qId = Guid.Parse(quizId);
             var url = $"https://localhost:7060/api/question/{qId}";
             var response = await HttpClient.GetFromJsonAsync<List<FetchQuizQuestionsResponseDto>>(url);
-
+            
             if (response != null)
             {
                 questions = response.Select(dto => new QuestionVM
@@ -92,6 +112,21 @@
                         option.IsCorrect = question.Answer.Contains(option.Text);
                     }
                 }
+            }
+            else
+            {
+                Console.WriteLine("Error: Unable to fetch quiz questions.");
+            }
+            var scoreUrl = $"https://localhost:7060/api/score/{qId}";
+            var scoresResponse = await HttpClient.GetFromJsonAsync<List<QuizLeaderboardVM>>(scoreUrl);
+
+            if (scoresResponse != null)
+            {
+                scores = scoresResponse.Select(dto => new QuizLeaderboardVM
+                {
+                    Username = dto.Username,
+                    Score = dto.Score
+                }).ToList();
             }
             else
             {
