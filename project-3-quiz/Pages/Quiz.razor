@@ -46,10 +46,18 @@
         <div class="d-flex justify-content-center">
             <p>Your total score on the quiz was @totalScore</p>
         </div>
+        @if (!scoreSubmitted)
+        {
+            // All questions have been answered, submit the score
+            SubmitAnswer();
+            scoreSubmitted = true;
+        }
     }
 
     <h3 class="d-flex justify-content-center">Quiz Highscores</h3>
     <div class="d-flex justify-content-center">
+        @if (scores != null && scores.Any())
+        {
         <table class="table">
             <thead>
                 <tr>
@@ -67,9 +75,15 @@
                 }
             </tbody>
         </table>
+        }
+        else
+        {
+            <p>No highscores available.</p>
+        }
     </div>
  }
 @code {
+    private bool scoreSubmitted = false;
     private int currentIndex = 0;
     private int totalScore = 0;
     [Parameter]
@@ -89,7 +103,7 @@
             Guid qId = Guid.Parse(quizId);
             var url = $"https://localhost:7060/api/question/{qId}";
             var response = await HttpClient.GetFromJsonAsync<List<FetchQuizQuestionsResponseDto>>(url);
-            
+
             if (response != null)
             {
                 questions = response.Select(dto => new QuestionVM
@@ -153,7 +167,7 @@
             // Timer expired, stop the timer and perform any action needed
             // For example, disable answer submission and calculate the total score
             ((System.Threading.Timer)state).Change(Timeout.Infinite, Timeout.Infinite);
-            SubmitAnswer();
+            currentIndex = questions.Count;
             StateHasChanged(); // Ensure the component re-renders
         }
     }
@@ -163,9 +177,9 @@
         var jwtToken = await _localStorageService.GetItemAsync<string>("JwtToken");
         ScoreDto scoreDto = new ScoreDto()
         {
+            QuizId = qId,
             JwtToken = jwtToken,
-            Score = totalScore,
-            QuizId = qId
+            Points = totalScore
         };
         HttpResponseMessage response = await HttpClient.PostAsJsonAsync("https://localhost:7060/api/score/create", scoreDto);
 
