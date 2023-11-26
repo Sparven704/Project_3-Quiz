@@ -5,6 +5,15 @@
 @using System.Net.Http.Json
 
 <h3 class="d-flex justify-content-center">Quiz List</h3>
+
+<div class="input-group mb-3">
+    <input type="text" class="form-control" @bind="searchValue" placeholder="Search..." aria-label="Search" aria-describedby="basic-addon2">
+    <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" @onclick="Search">Search</button>
+    </div>
+</div>
+
+
 <div class ="d-flex justify-content-center">
     <ul>
         @foreach (var quiz in quizzes)
@@ -24,12 +33,20 @@
     private string quizId;
     private string quizTitle;
     private int quizTimeLimitMin;
+    private string searchValue;
 
     protected override async Task OnInitializedAsync()
     {
         var response = await HttpClient.GetFromJsonAsync<List<QuizVM>>("https://localhost:7060/api/quiz/all");
         quizzes = response;
     }
+
+    private async Task Search()
+    {
+        var searchQuery = await HttpClient.GetFromJsonAsync<List<QuizVM>>($"api/quiz/title/{searchValue}");
+        quizzes = searchQuery;
+    }
+
 
     private void JoinQuiz(Guid qId, string qTitle, int qTimeLimit)
     {
