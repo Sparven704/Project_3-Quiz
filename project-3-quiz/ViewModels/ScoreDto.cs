@@ -2,8 +2,8 @@
 {
     public class ScoreDto
     {
-        public string JwtToken { get; set; }
         public Guid QuizId { get; set; }
-        public int Score { get; set; }
+        public string JwtToken { get; set; }
+        public int Points { get; set; }
     }
 }
