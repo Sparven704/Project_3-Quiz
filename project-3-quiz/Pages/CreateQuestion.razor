@@ -127,13 +127,18 @@ else
                 option4.Text
             };
         }
-        
+
         question.QuizId = Guid.Parse(quizId);
         HttpResponseMessage response = await HttpClient.PostAsJsonAsync("https://localhost:7060/api/question/create", question);
 
         if (response.IsSuccessStatusCode)
         {
-            
+            question.Answer = "";
+            question.Question = "";
+            option1.Text = "";
+            option2.Text = "";
+            option3.Text = "";
+            option4.Text = "";
         }
         else
         {
