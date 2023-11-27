@@ -11,6 +11,7 @@ namespace project_3_quiz_api.Data
         public DbSet<QuestionModel> Questions { get; set; }
         public DbSet<ScoreModel> Scores { get; set; }
         public DbSet<UserModel> Users { get; set; }
+        public DbSet<MediaModel> Media { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
@@ -29,13 +30,13 @@ namespace project_3_quiz_api.Data
                 .WithMany(c => c.Questions)
                 .HasForeignKey(q => q.QuizId);
 
-            //QuizModel
+            // QuizModel
             modelBuilder.Entity<QuizModel>()
                 .HasOne(qz => qz.Users)
                 .WithMany(u => u.Quizzes)
                 .HasForeignKey(qz => qz.UserId);
 
-            //ScoreModel
+            // ScoreModel
             modelBuilder.Entity<ScoreModel>()
                 .HasOne(s => s.Users)
                 .WithMany(u => u.Scores)
@@ -45,6 +46,12 @@ namespace project_3_quiz_api.Data
                 .HasOne(s => s.Quizzes)
                 .WithMany(qz => qz.Scores)
                 .HasForeignKey(s => s.QuizId);
+
+            // MediaModel
+            modelBuilder.Entity<MediaModel>()
+                .HasOne(m => m.Question)
+                .WithMany(q => q.Media)
+                .HasForeignKey(m => m.QuestionId);
 
         }
     }

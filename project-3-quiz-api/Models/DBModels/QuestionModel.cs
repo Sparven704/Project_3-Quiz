@@ -10,7 +10,7 @@ namespace project_3_quiz_api.Models.DBModels
         // Properties
         public string Question { get; set; }
         public string Answer { get; set; }
-        public string? link { get; set; }
+        public bool HasMedia { get; set; }
         public bool IsMultipleAnswer { get; set; }
         // Foreign Keys
 
@@ -19,5 +19,6 @@ namespace project_3_quiz_api.Models.DBModels
         // Navigation Properties
         public virtual QuizModel Quizzes { get; set; }
         public virtual IEnumerable<OptionModel> Options { get; set; }
+        public virtual IEnumerable<MediaModel> Media { get; set; }
     }
 }
