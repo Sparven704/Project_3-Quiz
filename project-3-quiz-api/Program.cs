@@ -59,6 +59,7 @@ namespace project_3_quiz_api
             builder.Services.AddScoped<QuizRepository>();
             builder.Services.AddScoped<ScoreRepository>();
             builder.Services.AddScoped<UserRepository>();
+            builder.Services.AddScoped<MediaRepository>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(

@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using project_3_quiz_api.Models.DBModels;
 using project_3_quiz_api.Models.DTO;
 using project_3_quiz_api.Repositories.Repository;
+using project_3_quiz_api.Services;
 
 namespace project_3_quiz_api.Controllers
 {
@@ -32,7 +33,7 @@ namespace project_3_quiz_api.Controllers
                     Id = Guid.NewGuid(),
                     Question = requestDto.Question,
                     Answer = requestDto.Answer,
-                    link = requestDto.Link,
+                    HasMedia = requestDto.HasMedia,
                     QuizId = requestDto.QuizId,
                     IsMultipleAnswer = requestDto.IsMultipleAnswer
                 };
@@ -95,7 +96,7 @@ namespace project_3_quiz_api.Controllers
                         {
                             Question = question.Question,
                             Answer = question.Answer,
-                            Link = question.link,
+                            HasMedia = question.HasMedia,
                             Options = optionQuerryResult.Select(o => o.Text).ToArray()
                         });
                     }
@@ -105,7 +106,7 @@ namespace project_3_quiz_api.Controllers
                         {
                             Question = question.Question,
                             Answer = question.Answer,
-                            Link = question.link,
+                            HasMedia = question.HasMedia,
                             Options = null
                         });
                     }
