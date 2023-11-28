@@ -9,5 +9,7 @@
         public bool IsAnswerSubmitted { get; set; }
         public bool IsMultipleAnswer { get; set; }
         public List<OptionVM> Options { get; set; }
+        public bool HasMedia { get; set; }
+        public FetchMediaDto Media { get; set; }
     }
 }
