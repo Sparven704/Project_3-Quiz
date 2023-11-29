@@ -56,7 +56,7 @@ namespace project_3_quiz_api.Controllers
                 
                 await _questionRepository.SaveAsync();
 
-                return Ok();
+                return Ok(newQuestion.Id);
             }
             catch (Exception ex)
             {

@@ -36,6 +36,8 @@ namespace project_3_quiz_api.Controllers
         {
             //Upload video or image
 
+            Guid questionId = Guid.Parse(requestDto.QuestionId);
+
             int maxMb = 13;
             long megaByte = 1024 * 1024;
 
@@ -53,8 +55,8 @@ namespace project_3_quiz_api.Controllers
                 return BadRequest("Invalid file type. Submitted filetype: " + requestDto.File.ContentType);
             }
 
-
-            var newMedia = await _mediaService.UploadMediaAsync(requestDto.File, requestDto.QuestionId);
+            
+            var newMedia = await _mediaService.UploadMediaAsync(requestDto.File, questionId);
 
             return Ok(newMedia);
         }

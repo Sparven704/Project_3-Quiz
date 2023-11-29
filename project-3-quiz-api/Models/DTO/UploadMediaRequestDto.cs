@@ -3,6 +3,6 @@
     public class UploadMediaRequestDto
     {
         public IFormFile File { get; set; }
-        public Guid QuestionId { get; set; }
+        public string QuestionId { get; set; }
     }
 }

@@ -1,9 +1,11 @@
 ﻿@page "/createquestion/{quizId}"
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
+@using project_3_quiz.Services;
 @using project_3_quiz.ViewModels
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Http;
+@using System.Net.Http.Headers;
 
 @if (submitting)
 {
@@ -41,7 +43,7 @@ else
                 @if (hasFile)
                 {
                     <div class="form-group">
-                        <input type="file" id="MediaFile" @onchange="SaveMedia" style="max-width: 600px;" />
+                        <InputFile id="MediaFile" OnChange="HandleFileChange" style="max-width: 600px;" />
                         <p class="text-muted">Upload a file (accepted formats: .jpg, .jpeg, .png, .gif, .mp4)</p>
                     </div>
                 }
@@ -83,7 +85,7 @@ else
     private OptionVM option4 = new OptionVM();
     private bool submitting = false;
     private bool hasFile = false;
-    private IFormFile mediaFile = null;
+    private IBrowserFile mediaFile = null;
 
     [Parameter]
     public string quizId { get; set; }
@@ -111,31 +113,65 @@ else
             hasFile = true;
         }
     }
-    private async Task SaveMedia()
+    private void HandleFileChange(InputFileChangeEventArgs e)
     {
-
-        if (mediaFile != null)
+        if (e != null)
         {
-            using (var stream = new MemoryStream())
+
+
+            var selectedFiles = e.GetMultipleFiles(); // Even if it's a single file, it's obtained as a list
+
+            if (selectedFiles != null && selectedFiles.Count > 0)
             {
-                await mediaFile.CopyToAsync(stream);
+                var file = selectedFiles[0];
 
-                var content = new MultipartFormDataContent();
-                content.Add(new StreamContent(stream), "file", mediaFile.FileName);
 
-                HttpResponseMessage response = await HttpClient.PostAsync("https://localhost:7060/api/media", content);
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".mp4" };
+                var extension = Path.GetExtension(file.Name).ToLowerInvariant();
 
-                if (response.IsSuccessStatusCode)
+                if (!allowedExtensions.Contains(extension))
                 {
-                    question.HasMedia = true;
+                    Console.WriteLine("Invalid file type");
+                    mediaFile = null;
                 }
                 else
                 {
-                    var errorMessage = await response.Content.ReadAsStringAsync();
-                    // Handle error
+                    mediaFile = file;
+                    question.HasMedia = true;
+                    Console.WriteLine(mediaFile);
                 }
             }
         }
+
+    }
+    private async Task SaveMedia(Guid questionId)
+    {
+        // using (var stream = new MemoryStream())
+        // {
+        // await mediaFile.OpenReadStream().CopyToAsync(stream);
+        var content = new MultipartFormDataContent();
+        var stream = mediaFile.OpenReadStream(maxAllowedSize: 13 * 1024 * 1024);
+
+        var fileContent = new StreamContent(stream);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(mediaFile.ContentType);
+        content.Add(fileContent, "file", mediaFile.Name);
+        content.Add(new StringContent(questionId.ToString()), "questionId");
+        Console.WriteLine("content set");
+
+      
+        HttpResponseMessage mediaResponse = await HttpClient.PostAsync("https://localhost:7060/api/media", content);
+        Console.WriteLine("Has Posted to Api");
+
+        if (mediaResponse.IsSuccessStatusCode)
+        {
+            // Handle success
+        }
+        else
+        {
+            var mediaErrorMessage = await mediaResponse.Content.ReadAsStringAsync();
+            // Handle error
+        }
+        // }
     }
     private async Task CreateQuestionFunction()
     {
@@ -145,6 +181,7 @@ else
         {
             question.Options = null;
         }
+
         else
         {
             question.Options = new string[]
@@ -161,12 +198,19 @@ else
 
         if (response.IsSuccessStatusCode)
         {
+            var questionId = await response.Content.ReadFromJsonAsync<Guid>();
+            // Upload the media file if it exists
+            if (mediaFile != null && questionId != Guid.Empty)
+            {
+                await SaveMedia(questionId);
+            }
             question.Answer = "";
             question.Question = "";
             option1.Text = "";
             option2.Text = "";
             option3.Text = "";
             option4.Text = "";
+            mediaFile = null;
         }
         else
         {
