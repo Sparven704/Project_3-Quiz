@@ -2,7 +2,8 @@
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @using project_3_quiz.ViewModels
-
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Http;
 
 @if (submitting)
 {
@@ -37,10 +38,11 @@ else
                     <button type="button" class="btn btn-primary" @onclick="QuestionIsMultipleAnswer"> Multiple answer question</button>
                     <button type="button" class="btn btn-primary" @onclick="QuestionHasLink"> Video or img link</button>
                 </div>
-                @if (hasLink)
+                @if (hasFile)
                 {
                     <div class="form-group">
-                        <input class="form-control mx-auto" type="text" id="Link" @bind="@question.Link" placeholder="Link URL" style="max-width: 600px;">
+                        <input type="file" id="MediaFile" @onchange="SaveMedia" style="max-width: 600px;" />
+                        <p class="text-muted">Upload a file (accepted formats: .jpg, .jpeg, .png, .gif, .mp4)</p>
                     </div>
                 }
                 @if (question.IsMultipleAnswer)
@@ -80,8 +82,8 @@ else
     private OptionVM option3 = new OptionVM();
     private OptionVM option4 = new OptionVM();
     private bool submitting = false;
-    private bool hasLink = false;
-
+    private bool hasFile = false;
+    private IFormFile mediaFile = null;
 
     [Parameter]
     public string quizId { get; set; }
@@ -100,13 +102,39 @@ else
     }
     private void QuestionHasLink()
     {
-        if (hasLink == true)
+        if (hasFile == true)
         {
-            hasLink = false;
+            hasFile = false;
         }
         else
         {
-            hasLink = true;
+            hasFile = true;
+        }
+    }
+    private async Task SaveMedia()
+    {
+
+        if (mediaFile != null)
+        {
+            using (var stream = new MemoryStream())
+            {
+                await mediaFile.CopyToAsync(stream);
+
+                var content = new MultipartFormDataContent();
+                content.Add(new StreamContent(stream), "file", mediaFile.FileName);
+
+                HttpResponseMessage response = await HttpClient.PostAsync("https://localhost:7060/api/media", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    question.HasMedia = true;
+                }
+                else
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    // Handle error
+                }
+            }
         }
     }
     private async Task CreateQuestionFunction()
