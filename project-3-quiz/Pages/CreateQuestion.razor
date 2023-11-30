@@ -1,9 +1,12 @@
 ﻿@page "/createquestion/{quizId}"
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Http.Internal;
+@using project_3_quiz.Services;
 @using project_3_quiz.ViewModels
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Http;
+@using System.Net.Http.Headers;
 
 @if (submitting)
 {
@@ -36,18 +39,11 @@ else
                 </div>
                 <div class="form-group">
                     <button type="button" class="btn btn-primary" @onclick="QuestionIsMultipleAnswer"> Multiple answer question</button>
-                    <button type="button" class="btn btn-primary" @onclick="QuestionHasLink"> Video or img link</button>
                 </div>
-                @if (hasFile)
+                
+                @* @if (question.IsMultipleAnswer)
                 {
-                    <div class="form-group">
-                        <input type="file" id="MediaFile" @onchange="SaveMedia" style="max-width: 600px;" />
-                        <p class="text-muted">Upload a file (accepted formats: .jpg, .jpeg, .png, .gif, .mp4)</p>
-                    </div>
-                }
-                @if (question.IsMultipleAnswer)
-                {
-                    @*-----Options-----*@
+                    @*-----Options-----*
                     <div class="form-group">
                         <input class="form-control mx-auto" type="text" id="Option1" @bind="@option1.Text" placeholder="Option one" style="max-width: 600px;">
                     </div>
@@ -60,15 +56,20 @@ else
                     <div class="form-group">
                         <input class="form-control mx-auto" type="text" id="Option4" @bind="@option4.Text" placeholder="Option four" style="max-width: 600px;">
                     </div>
-                }
-                
+                } *@
 
+                    <div class="form-group">
+                        <InputFile id="fileInput" class="form-control" OnChange="HandleFileChange" />
+                        <p class="text-muted">Upload a file (accepted formats: .jpg, .jpeg, .png, .gif, .mp4)</p>
+                    </div>
+                
                 
                 @*-----Button-----*@
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">Create Question</button>
                 </div>
-            </form>  
+            </form>
+            
         </div>
     </div>
 
@@ -82,8 +83,10 @@ else
     private OptionVM option3 = new OptionVM();
     private OptionVM option4 = new OptionVM();
     private bool submitting = false;
-    private bool hasFile = false;
-    private IFormFile mediaFile = null;
+    //private bool hasFile = false;
+    private IBrowserFile file;
+    private string uploadMessage;
+    private long maxFileSize = 1024 * 1024 * 13;
 
     [Parameter]
     public string quizId { get; set; }
@@ -100,51 +103,130 @@ else
             question.IsMultipleAnswer = true;
         }
     }
-    private void QuestionHasLink()
+    // private void QuestionHasLink()
+    // {
+    //     if (hasFile == true)
+    //     {
+    //         hasFile = false;
+    //     }
+    //     else
+    //     {
+    //         hasFile = true;
+    //     }
+    // }
+    // private void HandleFileChange(InputFileChangeEventArgs e)
+    // {
+    //     try
+    //     {
+    //         if (e != null)
+    //         {
+    //             var selectedFiles = e.File; // Even if it's a single file, it's obtained as a list
+
+    //             if (selectedFiles is not null)
+    //             {
+    //                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".mp4" };
+    //                 var extension = Path.GetExtension(selectedFiles.Name).ToLowerInvariant();
+
+    //                 if (!allowedExtensions.Contains(extension))
+    //                 {
+    //                     Console.WriteLine("Invalid file type");
+    //                     file = null;
+    //                 }
+    //                 else
+    //                 {
+    //                     file = selectedFiles;
+    //                     question.HasMedia = true;
+    //                     Console.WriteLine(file);
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine(ex.Message);
+    //     }
+
+    //     StateHasChanged();
+    // }
+    private void HandleFileChange(InputFileChangeEventArgs e)
     {
-        if (hasFile == true)
-        {
-            hasFile = false;
-        }
-        else
-        {
-            hasFile = true;
-        }
+        file = e.File;
+        //hasFile = true;
     }
+
+    // private async Task SaveMedia(Guid questionId)
+    // {
+    //     var stream = mediaFile.OpenReadStream(maxAllowedSize: 13 * 1024 * 1024);
+    //     var content = new FormFile(stream, 0, mediaFile.Size, mediaFile.Name, mediaFile.Name);
+
+
+    //     //var fileContent = new StreamContent(stream);
+    //     //fileContent.Headers.ContentType = new MediaTypeHeaderValue(mediaFile.ContentType);
+    //     //content.Add(fileContent, "file", mediaFile.Name);
+    //     //content.Add(new StringContent(questionId.ToString()), "questionId");
+    //     Console.WriteLine("content set");
+
+    //     HttpResponseMessage mediaResponse = await HttpClient.PostAsJsonAsync("https://localhost:7060/api/media", content);
+    //     Console.WriteLine("Has Posted to Api");
+
+    //     if (mediaResponse.IsSuccessStatusCode)
+    //     {
+    //         // Handle success
+    //     }
+    //     else
+    //     {
+    //         var mediaErrorMessage = await mediaResponse.Content.ReadAsStringAsync();
+    //         // Handle error
+    //     }
+    // }
+
     private async Task SaveMedia()
     {
-
-        if (mediaFile != null)
+        if (file != null)
         {
-            using (var stream = new MemoryStream())
+            try
             {
-                await mediaFile.CopyToAsync(stream);
+                // Create a FormData object to send the file to the API
+                var formData = new MultipartFormDataContent();
+                var streamContent = new StreamContent(file.OpenReadStream(512000000));
+                streamContent.Headers.Add("Content-Length", file.Size.ToString());
+                formData.Add(streamContent, "file", file.Name);
 
-                var content = new MultipartFormDataContent();
-                content.Add(new StreamContent(stream), "file", mediaFile.FileName);
-
-                HttpResponseMessage response = await HttpClient.PostAsync("https://localhost:7060/api/media", content);
+                // Send the file to the API endpoint
+                var response = await HttpClient.PostAsync("https://localhost:7060/api/media", formData);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    question.HasMedia = true;
+                    Console.WriteLine($"File '{file.Name}' uploaded successfully!");
                 }
                 else
                 {
-                    var errorMessage = await response.Content.ReadAsStringAsync();
-                    // Handle error
+                    Console.WriteLine($"Error uploading file: {response.ReasonPhrase}");
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+        else
+        {
+            Console.WriteLine("Please select a file to upload.");
         }
     }
+
+
+
     private async Task CreateQuestionFunction()
     {
+        await SaveMedia();
         submitting = true;
 
         if (question.IsMultipleAnswer == false)
         {
             question.Options = null;
         }
+
         else
         {
             question.Options = new string[]
@@ -161,12 +243,19 @@ else
 
         if (response.IsSuccessStatusCode)
         {
+            var questionId = await response.Content.ReadFromJsonAsync<Guid>();
+            // Upload the media file if it exists
+            // if (file != null)
+            // {
+            //     await SaveMedia();
+            // }
             question.Answer = "";
             question.Question = "";
             option1.Text = "";
             option2.Text = "";
             option3.Text = "";
             option4.Text = "";
+            file = null;
         }
         else
         {

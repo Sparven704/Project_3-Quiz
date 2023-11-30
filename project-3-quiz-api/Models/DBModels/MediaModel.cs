@@ -12,10 +12,8 @@ namespace project_3_quiz_api.Models.DBModels
         public string MediaType { get; set; }
         public string MediaUrl { get; set; }
 
-        // Foreign Key
-        public Guid QuestionId { get; set; }
-
         // Navigation Property
-        public virtual QuestionModel Question { get; set; }
+
+        public virtual IEnumerable<QuestionModel> Questions { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace project_3_quiz_api.Services
             return media;
         }
 
-        public async Task<MediaModel> UploadMediaAsync(IFormFile file, Guid questionId)
+        public async Task<MediaModel> UploadMediaAsync(IFormFile file)
         {
             var mediaId = Guid.NewGuid();
             var fileName = $"{mediaId}{Path.GetExtension(file.FileName)}";
@@ -31,8 +31,7 @@ namespace project_3_quiz_api.Services
             {
                 Id = mediaId,
                 MediaType = file.ContentType,
-                MediaUrl = filePath,
-                QuestionId = questionId
+                MediaUrl = filePath
             };
 
             await _mediaRepository.CreateAsync(media);
@@ -46,34 +45,37 @@ namespace project_3_quiz_api.Services
             string imageDir = "wwwroot/images";
             string videoDir = "wwwroot/videos";
             string destDir = imageDir;
+            string[] permittedImageFileTypes = { "jpg", "jpeg", "png" };
+            string[] permittedVideoFileTypes = { "mp4", "gif", "mov" };
 
+            string fileExtension = Path.GetExtension(file.FileName)?.TrimStart('.');
 
-            if (file.ContentType.StartsWith("video"))
+            if (!string.IsNullOrEmpty(fileExtension))
             {
-                bool videoDirExist = Directory.Exists(videoDir);
-
-                if (!videoDirExist)
+                if (permittedVideoFileTypes.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
                 {
-                    Directory.CreateDirectory(videoDir);
+                    bool videoDirExist = Directory.Exists(videoDir);
+
+                    if (!videoDirExist)
+                    {
+                        Directory.CreateDirectory(videoDir);
+                    }
+
+                    destDir = videoDir;
                 }
-
-                destDir = videoDir;
-
-            }
-            else if (file.ContentType.StartsWith("image"))
-            {
-                bool imageDirExist = Directory.Exists(imageDir);
-
-                if (!imageDirExist)
+                else if (permittedImageFileTypes.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
                 {
-                    Directory.CreateDirectory(imageDir);
+                    bool imageDirExist = Directory.Exists(imageDir);
+
+                    if (!imageDirExist)
+                    {
+                        Directory.CreateDirectory(imageDir);
+                    }
                 }
-
             }
-
-            Directory.CreateDirectory(fileName);
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), destDir, fileName);
+
             // Save the file
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
@@ -84,7 +86,6 @@ namespace project_3_quiz_api.Services
             var returnPath = Path.Combine(destDir, fileName);
 
             returnPath = returnPath.Replace("\\", "/");
-
 
             return returnPath;
         }
