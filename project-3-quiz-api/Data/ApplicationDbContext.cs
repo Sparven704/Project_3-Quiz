@@ -30,6 +30,11 @@ namespace project_3_quiz_api.Data
                 .WithMany(c => c.Questions)
                 .HasForeignKey(q => q.QuizId);
 
+            modelBuilder.Entity<QuestionModel>()
+                .HasOne(q => q.Media)
+                .WithMany(m => m.Questions)
+                .HasForeignKey(q => q.MediaId);
+
             // QuizModel
             modelBuilder.Entity<QuizModel>()
                 .HasOne(qz => qz.Users)
@@ -47,11 +52,6 @@ namespace project_3_quiz_api.Data
                 .WithMany(qz => qz.Scores)
                 .HasForeignKey(s => s.QuizId);
 
-            // MediaModel
-            modelBuilder.Entity<MediaModel>()
-                .HasOne(m => m.Question)
-                .WithMany(q => q.Media)
-                .HasForeignKey(m => m.QuestionId);
 
         }
     }

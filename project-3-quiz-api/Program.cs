@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using project_3_quiz_api.Data;
 using project_3_quiz_api.Repositories.Interfaces;
 using project_3_quiz_api.Repositories.Repository;
+using project_3_quiz_api.Services;
 using System.Text;
 
 namespace project_3_quiz_api
@@ -60,6 +61,7 @@ namespace project_3_quiz_api
             builder.Services.AddScoped<ScoreRepository>();
             builder.Services.AddScoped<UserRepository>();
             builder.Services.AddScoped<MediaRepository>();
+            builder.Services.AddScoped<MediaService>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
