@@ -87,7 +87,7 @@ else
     private IBrowserFile file;
     private string uploadMessage;
     private long maxFileSize = 1024 * 1024 * 13;
-
+    private Guid mediaId;
     [Parameter]
     public string quizId { get; set; }
 
@@ -103,82 +103,15 @@ else
             question.IsMultipleAnswer = true;
         }
     }
-    // private void QuestionHasLink()
-    // {
-    //     if (hasFile == true)
-    //     {
-    //         hasFile = false;
-    //     }
-    //     else
-    //     {
-    //         hasFile = true;
-    //     }
-    // }
-    // private void HandleFileChange(InputFileChangeEventArgs e)
-    // {
-    //     try
-    //     {
-    //         if (e != null)
-    //         {
-    //             var selectedFiles = e.File; // Even if it's a single file, it's obtained as a list
 
-    //             if (selectedFiles is not null)
-    //             {
-    //                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".mp4" };
-    //                 var extension = Path.GetExtension(selectedFiles.Name).ToLowerInvariant();
 
-    //                 if (!allowedExtensions.Contains(extension))
-    //                 {
-    //                     Console.WriteLine("Invalid file type");
-    //                     file = null;
-    //                 }
-    //                 else
-    //                 {
-    //                     file = selectedFiles;
-    //                     question.HasMedia = true;
-    //                     Console.WriteLine(file);
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine(ex.Message);
-    //     }
-
-    //     StateHasChanged();
-    // }
     private void HandleFileChange(InputFileChangeEventArgs e)
     {
         file = e.File;
         //hasFile = true;
     }
 
-    // private async Task SaveMedia(Guid questionId)
-    // {
-    //     var stream = mediaFile.OpenReadStream(maxAllowedSize: 13 * 1024 * 1024);
-    //     var content = new FormFile(stream, 0, mediaFile.Size, mediaFile.Name, mediaFile.Name);
 
-
-    //     //var fileContent = new StreamContent(stream);
-    //     //fileContent.Headers.ContentType = new MediaTypeHeaderValue(mediaFile.ContentType);
-    //     //content.Add(fileContent, "file", mediaFile.Name);
-    //     //content.Add(new StringContent(questionId.ToString()), "questionId");
-    //     Console.WriteLine("content set");
-
-    //     HttpResponseMessage mediaResponse = await HttpClient.PostAsJsonAsync("https://localhost:7060/api/media", content);
-    //     Console.WriteLine("Has Posted to Api");
-
-    //     if (mediaResponse.IsSuccessStatusCode)
-    //     {
-    //         // Handle success
-    //     }
-    //     else
-    //     {
-    //         var mediaErrorMessage = await mediaResponse.Content.ReadAsStringAsync();
-    //         // Handle error
-    //     }
-    // }
 
     private async Task SaveMedia()
     {
@@ -197,6 +130,8 @@ else
 
                 if (response.IsSuccessStatusCode)
                 {
+                    question.HasMedia = true;
+                    mediaId = await response.Content.ReadFromJsonAsync<Guid>();
                     Console.WriteLine($"File '{file.Name}' uploaded successfully!");
                 }
                 else
@@ -239,16 +174,12 @@ else
         }
 
         question.QuizId = Guid.Parse(quizId);
+        question.MediaId = mediaId;
         HttpResponseMessage response = await HttpClient.PostAsJsonAsync("https://localhost:7060/api/question/create", question);
 
         if (response.IsSuccessStatusCode)
         {
-            var questionId = await response.Content.ReadFromJsonAsync<Guid>();
-            // Upload the media file if it exists
-            // if (file != null)
-            // {
-            //     await SaveMedia();
-            // }
+            
             question.Answer = "";
             question.Question = "";
             option1.Text = "";

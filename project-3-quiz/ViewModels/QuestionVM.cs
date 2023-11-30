@@ -11,5 +11,6 @@
         public List<OptionVM> Options { get; set; }
         public bool HasMedia { get; set; }
         public FetchMediaDto Media { get; set; }
+        public Guid? MediaId { get; set; }
     }
 }

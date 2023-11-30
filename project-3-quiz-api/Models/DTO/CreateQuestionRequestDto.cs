@@ -8,5 +8,6 @@
         public bool HasMedia { get; set; }
         public bool IsMultipleAnswer { get; set; }
         public string[]? Options { get; set; }
+        public Guid? MediaId { get; set; }
     }
 }

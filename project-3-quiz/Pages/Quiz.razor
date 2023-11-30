@@ -33,6 +33,7 @@
             }
             @if (questions[currentIndex].HasMedia)
             {
+                FetchMedia(questions[currentIndex].MediaId);
                 <img src="@questions[currentIndex].Media.Path" alt="Media" />
             }
             else
@@ -42,7 +43,7 @@
                     <input class="form-control mx-auto" type="text" id="Option" @bind="@questions[currentIndex].Options[0].SingleOption" placeholder="Answer" style="max-width: 600px;" />
                 </div>
             }
-
+            
             <button @onclick="(() => SubmitAnswer())" disabled="@questions[currentIndex].IsAnswerSubmitted">Submit Answer</button>
         </div>
     }
@@ -103,21 +104,23 @@
     private System.Threading.Timer timer;
 
 
-    private async Task FetchMedia(Guid questionId)
+    private async Task FetchMedia(Guid? mediaId)
     {
         try
         {
-            var mediaUrl = $"https://localhost:7060/api/media/{questionId}";
+            Console.WriteLine("FetchMedia Start");
+            var mediaUrl = $"https://localhost:7060/api/media/{mediaId}";
             var mediaResponse = await HttpClient.GetFromJsonAsync<FetchMediaDto>(mediaUrl);
 
             if (mediaResponse != null)
             {
+                Console.WriteLine("FetchMedia is not null", mediaResponse);
                 questions[currentIndex].Media = mediaResponse;
-                StateHasChanged(); // Ensure the component re-renders to display the media
+                /* StateHasChanged(); */ // Ensure the component re-renders to display the media
             }
             else
             {
-                Console.WriteLine($"Error: Unable to fetch media for question {questionId}");
+                Console.WriteLine($"Error: Unable to fetch media for question {mediaId}");
             }
         }
         catch (Exception ex)
@@ -140,6 +143,8 @@
                     {
                         Question = dto.Question,
                         IsMultipleAnswer = dto.Options != null,
+                        HasMedia = dto.HasMedia,
+                        MediaId = dto.MediaId,
                         Options = dto.Options?.Select(option => new OptionVM
                         {
                             Text = option,
@@ -178,43 +183,36 @@
             {
                 Console.WriteLine("Error: Unable to fetch quiz questions.");
             }
-            // MEDIA CODE
-            foreach (var question in questions)
-            {
-                if (question.HasMedia)
-                {
-                    await FetchMedia(question.Id); // Fetch media for questions with media
-                }
-            }
+          
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
         }
-        timeRemaining = int.Parse(quizTimeLimitMin)*60;
-        timer = new System.Threading.Timer(TimerCallback, null, 1000, 1000);
+        // timeRemaining = int.Parse(quizTimeLimitMin)*60;
+        // timer = new System.Threading.Timer(TimerCallback, null, 1000, 1000);
     }
-    private void TimerCallback(object state)
-    {
-        // Decrement the time remaining
-        if (timeRemaining > 0)
-        {
-            timeRemaining--;
-            StateHasChanged();
-        }
-        if (scoreSubmitted || state == null)
-        {
-            // All answers submitted or timer is null, stops the timer
-            ((System.Threading.Timer)state)?.Dispose(); // Stop the timer
-        }
-        else if (timeRemaining <= 0)
-        {
-            // Timer expired, stops the timer
-            ((System.Threading.Timer)state)?.Dispose(); // Stop the timer
-            currentIndex = questions.Count;
-            StateHasChanged(); // Ensure the component re-renders
-        }
-    }
+    // private void TimerCallback(object state)
+    // {
+    //     // Decrement the time remaining
+    //     if (timeRemaining > 0)
+    //     {
+    //         timeRemaining--;
+    //         StateHasChanged();
+    //     }
+    //     if (scoreSubmitted || state == null)
+    //     {
+    //         // All answers submitted or timer is null, stops the timer
+    //         ((System.Threading.Timer)state)?.Dispose(); // Stop the timer
+    //     }
+    //     else if (timeRemaining <= 0)
+    //     {
+    //         // Timer expired, stops the timer
+    //         ((System.Threading.Timer)state)?.Dispose(); // Stop the timer
+    //         currentIndex = questions.Count;
+    //         StateHasChanged(); // Ensure the component re-renders
+    //     }
+    // }
     private async Task LogScore()
     {
         Guid qId = Guid.Parse(quizId);

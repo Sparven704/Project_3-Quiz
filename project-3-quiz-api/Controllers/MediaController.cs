@@ -31,35 +31,6 @@ namespace project_3_quiz_api.Controllers
             return Ok(fetchMediaResponseDto);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> UploadMediaAsync([FromBody] UploadMediaRequestDto requestDto)
-        //{
-        //    //Upload video or image
-
-        //    Guid questionId = Guid.Parse(requestDto.QuestionId);
-
-        //    int maxMb = 13;
-        //    long megaByte = 1024 * 1024;
-
-        //    long maxAllowedSizeInBytes = maxMb * megaByte;
-        //    string[] permittedFileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4" };
-        //    var extension = Path.GetExtension(requestDto.File.FileName).ToLowerInvariant();
-
-        //    if (requestDto.File.Length > maxAllowedSizeInBytes)
-        //    {
-        //        return BadRequest("File size exceeds the allowable limit.");
-        //    }
-
-        //    if (string.IsNullOrEmpty(extension) || !permittedFileTypes.Contains(extension))
-        //    {
-        //        return BadRequest("Invalid file type. Submitted filetype: " + requestDto.File.ContentType);
-        //    }
-
-
-        //    var newMedia = await _mediaService.UploadMediaAsync(requestDto.File, questionId);
-
-        //    return Ok(newMedia);
-        //}
 
         [HttpPost]
         public async Task<IActionResult> UploadFile()
