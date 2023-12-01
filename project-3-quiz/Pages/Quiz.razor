@@ -33,9 +33,18 @@
             }
             @if (questions[currentIndex].HasMedia)
             {
-                FetchMedia(questions[currentIndex].MediaId);
-                <img src="@questions[currentIndex].Media.Path" alt="Media" />
+                <p>Loading media...</p>
+               
+                @if (mediaList[currentIndex].MediaPath.Contains("image"))
+                {
+                    <img src="@mediaList[currentIndex].MediaPath" alt="Image Media" style="Height: 300px;" />
+                }
+                else if (mediaList[currentIndex].MediaPath.Contains("video"))
+                {
+                    <_PlayVideo VideoPath="@mediaList[currentIndex].MediaPath" VideoType="@mediaList[currentIndex].MediaType" ShowVideo=true />
+                }
             }
+            
             else
             {
                 <!-- Use a textbox for single-answer questions -->
@@ -99,12 +108,15 @@
     [Parameter]
     public string quizTimeLimitMin { get; set; }
     private int timeRemaining;
-    private List<QuestionVM> questions;
-    private List<QuizLeaderboardVM> scores;
+    private List<QuestionVM> questions = new();
+    private List<QuizLeaderboardVM> scores = new();
+    private List<FetchMediaDto> mediaList = new();
     private System.Threading.Timer timer;
+    private bool hasVideo = false;
+    private bool hasImage = false;
 
 
-    private async Task FetchMedia(Guid? mediaId)
+    private async Task<FetchMediaDto> FetchMedia(Guid? mediaId)
     {
         try
         {
@@ -114,19 +126,15 @@
 
             if (mediaResponse != null)
             {
-                Console.WriteLine("FetchMedia is not null", mediaResponse);
-                questions[currentIndex].Media = mediaResponse;
-                /* StateHasChanged(); */ // Ensure the component re-renders to display the media
-            }
-            else
-            {
-                Console.WriteLine($"Error: Unable to fetch media for question {mediaId}");
+                //Console.WriteLine("FetchMedia is not null", mediaResponse);
+                return mediaResponse;
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
         }
+        return null;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -155,12 +163,30 @@
 
                 foreach (var question in questions)
                 {
+                    if (question.HasMedia)
+                    {
+                        var fetchMediaResponse = await FetchMedia(question.MediaId);
+                        mediaList.Add(new FetchMediaDto()
+                        {
+                            MediaPath = fetchMediaResponse.MediaPath,
+                            MediaType = fetchMediaResponse.MediaType
+                        });
+                    }
+                    else
+                    {
+                        mediaList.Add(new FetchMediaDto()
+                        {
+                            MediaPath = "",
+                            MediaType = ""
+                        });
+                    }
                     foreach (var option in question.Options)
                     {
                         // Set IsCorrect based on whether the option is in the CorrectOptions list
                         option.IsCorrect = question.Answer.Contains(option.Text);
                     }
                 }
+                Console.WriteLine(mediaList.Count);
             }
             else
             {

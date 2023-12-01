@@ -1,8 +1,9 @@
-﻿namespace project_3_quiz_api.Models.DTO
+﻿namespace project_3_quiz.ViewModels
 {
-    public class FetchMediaResponseDto
+    public class MediaVm
     {
         public string MediaType { get; set; }
         public string MediaPath { get; set; }
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using project_3_quiz_api.Models.DTO;
+using project_3_quiz_api.Repositories.Repository;
 using project_3_quiz_api.Services;
 
 namespace project_3_quiz_api.Controllers
@@ -24,8 +25,8 @@ namespace project_3_quiz_api.Controllers
 
             FetchMediaResponseDto fetchMediaResponseDto = new()
             {
-                Type = media.MediaType,
-                Path = media.MediaUrl
+                MediaType = media.MediaType,
+                MediaPath = media.MediaUrl
             };
 
             return Ok(fetchMediaResponseDto);
@@ -59,6 +60,7 @@ namespace project_3_quiz_api.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
