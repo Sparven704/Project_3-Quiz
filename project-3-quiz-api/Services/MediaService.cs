@@ -48,33 +48,41 @@ namespace project_3_quiz_api.Services
             string[] permittedImageFileTypes = { "jpg", "jpeg", "png" };
             string[] permittedVideoFileTypes = { "mp4", "gif", "mov" };
 
+            //Replace Server directory with Client directory
+            string currentDir = Directory.GetCurrentDirectory();
+            currentDir = currentDir.Replace("project-3-quiz-api", "project-3-quiz");
+
             string fileExtension = Path.GetExtension(file.FileName)?.TrimStart('.');
 
             if (!string.IsNullOrEmpty(fileExtension))
             {
                 if (permittedVideoFileTypes.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
                 {
-                    bool videoDirExist = Directory.Exists(videoDir);
+                    string directory = Path.Combine(currentDir, videoDir);
+                    bool videoDirExist = Directory.Exists(directory);
 
                     if (!videoDirExist)
                     {
-                        Directory.CreateDirectory(videoDir);
+                        Directory.CreateDirectory(directory);
                     }
 
                     destDir = videoDir;
                 }
                 else if (permittedImageFileTypes.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
                 {
-                    bool imageDirExist = Directory.Exists(imageDir);
+                    string directory = Path.Combine(currentDir, imageDir);
+                    bool imageDirExist = Directory.Exists(directory);
 
                     if (!imageDirExist)
                     {
-                        Directory.CreateDirectory(imageDir);
+                        Directory.CreateDirectory(directory);
                     }
                 }
             }
+            
 
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), destDir, fileName);
+
+            var filePath = Path.Combine(currentDir, destDir, fileName);
 
             // Save the file
             using (var stream = new FileStream(filePath, FileMode.Create))

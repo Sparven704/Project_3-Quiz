@@ -35,11 +35,17 @@ namespace project_3_quiz_api.Controllers
                     Answer = requestDto.Answer,
                     HasMedia = requestDto.HasMedia,
                     QuizId = requestDto.QuizId,
-                    IsMultipleAnswer = requestDto.IsMultipleAnswer
+                    IsMultipleAnswer = requestDto.IsMultipleAnswer,
+                    MediaId = requestDto.MediaId
                 };
 
-                await _questionRepository.CreateAsync(newQuestion);
+                if (newQuestion.MediaId == Guid.Empty)
+                {
+                    newQuestion.MediaId = null;
+                }
 
+                await _questionRepository.CreateAsync(newQuestion);
+                //await Console.Out.WriteLineAsync("test");
                 if (newQuestion.IsMultipleAnswer is true)
                 {
                     foreach (var option in requestDto.Options)
@@ -97,7 +103,9 @@ namespace project_3_quiz_api.Controllers
                             Question = question.Question,
                             Answer = question.Answer,
                             HasMedia = question.HasMedia,
-                            Options = optionQuerryResult.Select(o => o.Text).ToArray()
+                            Options = optionQuerryResult.Select(o => o.Text).ToArray(),
+                            MediaId = question.MediaId
+
                         });
                     }
                     else
@@ -107,7 +115,8 @@ namespace project_3_quiz_api.Controllers
                             Question = question.Question,
                             Answer = question.Answer,
                             HasMedia = question.HasMedia,
-                            Options = null
+                            Options = null,
+                            MediaId = question.MediaId
                         });
                     }
                 }

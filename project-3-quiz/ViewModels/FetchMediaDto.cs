@@ -2,7 +2,7 @@
 {
     public class FetchMediaDto
     {
-        public string Type { get; set; }
-        public string Path { get; set; }
+        public string MediaType { get; set; }
+        public string MediaPath { get; set; }
     }
 }

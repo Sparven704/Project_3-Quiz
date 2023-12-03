@@ -6,5 +6,6 @@
         public string Answer { get; set; }
         public bool HasMedia { get; set; }
         public string[]? Options { get; set; }
+        public Guid? MediaId { get; set; }
     }
 }

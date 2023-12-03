@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using project_3_quiz_api.Models.DTO;
+using project_3_quiz_api.Repositories.Repository;
 using project_3_quiz_api.Services;
 
 namespace project_3_quiz_api.Controllers
@@ -24,42 +25,13 @@ namespace project_3_quiz_api.Controllers
 
             FetchMediaResponseDto fetchMediaResponseDto = new()
             {
-                Type = media.MediaType,
-                Path = media.MediaUrl
+                MediaType = media.MediaType,
+                MediaPath = media.MediaUrl
             };
 
             return Ok(fetchMediaResponseDto);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> UploadMediaAsync([FromBody] UploadMediaRequestDto requestDto)
-        //{
-        //    //Upload video or image
-
-        //    Guid questionId = Guid.Parse(requestDto.QuestionId);
-
-        //    int maxMb = 13;
-        //    long megaByte = 1024 * 1024;
-
-        //    long maxAllowedSizeInBytes = maxMb * megaByte;
-        //    string[] permittedFileTypes = { ".jpg", ".jpeg", ".png", ".gif", ".mp4" };
-        //    var extension = Path.GetExtension(requestDto.File.FileName).ToLowerInvariant();
-
-        //    if (requestDto.File.Length > maxAllowedSizeInBytes)
-        //    {
-        //        return BadRequest("File size exceeds the allowable limit.");
-        //    }
-
-        //    if (string.IsNullOrEmpty(extension) || !permittedFileTypes.Contains(extension))
-        //    {
-        //        return BadRequest("Invalid file type. Submitted filetype: " + requestDto.File.ContentType);
-        //    }
-
-
-        //    var newMedia = await _mediaService.UploadMediaAsync(requestDto.File, questionId);
-
-        //    return Ok(newMedia);
-        //}
 
         [HttpPost]
         public async Task<IActionResult> UploadFile()
@@ -88,6 +60,7 @@ namespace project_3_quiz_api.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }

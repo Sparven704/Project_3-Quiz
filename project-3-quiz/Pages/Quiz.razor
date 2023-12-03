@@ -32,8 +32,15 @@
                 </ul>
             }
             @if (questions[currentIndex].HasMedia)
-            {
-                <img src="@questions[currentIndex].Media.Path" alt="Media" />
+            {  
+                @if (mediaList[currentIndex].MediaPath.Contains("image"))
+                {
+                    <img src="@mediaList[currentIndex].MediaPath" alt="Image Media" style="Height: 300px;" />
+                }
+                else if (mediaList[currentIndex].MediaPath.Contains("video"))
+                {
+                    <_PlayVideo VideoPath="@mediaList[currentIndex].MediaPath" VideoType="@mediaList[currentIndex].MediaType" ShowVideo=true />
+                }
             }
             else
             {
@@ -42,7 +49,7 @@
                     <input class="form-control mx-auto" type="text" id="Option" @bind="@questions[currentIndex].Options[0].SingleOption" placeholder="Answer" style="max-width: 600px;" />
                 </div>
             }
-
+            
             <button @onclick="(() => SubmitAnswer())" disabled="@questions[currentIndex].IsAnswerSubmitted">Submit Answer</button>
         </div>
     }
@@ -98,32 +105,33 @@
     [Parameter]
     public string quizTimeLimitMin { get; set; }
     private int timeRemaining;
-    private List<QuestionVM> questions;
-    private List<QuizLeaderboardVM> scores;
+    private List<QuestionVM> questions = new();
+    private List<QuizLeaderboardVM> scores = new();
+    private List<FetchMediaDto> mediaList = new();
     private System.Threading.Timer timer;
+    private bool hasVideo = false;
+    private bool hasImage = false;
 
 
-    private async Task FetchMedia(Guid questionId)
+    private async Task<FetchMediaDto> FetchMedia(Guid? mediaId)
     {
         try
         {
-            var mediaUrl = $"https://localhost:7060/api/media/{questionId}";
+            Console.WriteLine("FetchMedia Start");
+            var mediaUrl = $"https://localhost:7060/api/media/{mediaId}";
             var mediaResponse = await HttpClient.GetFromJsonAsync<FetchMediaDto>(mediaUrl);
 
             if (mediaResponse != null)
             {
-                questions[currentIndex].Media = mediaResponse;
-                StateHasChanged(); // Ensure the component re-renders to display the media
-            }
-            else
-            {
-                Console.WriteLine($"Error: Unable to fetch media for question {questionId}");
+                //Console.WriteLine("FetchMedia is not null", mediaResponse);
+                return mediaResponse;
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
         }
+        return null;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -134,12 +142,21 @@
             var url = $"https://localhost:7060/api/question/{qId}";
             var response = await HttpClient.GetFromJsonAsync<List<FetchQuizQuestionsResponseDto>>(url);
 
+            string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+            Console.WriteLine(currentDirectory);
+
+            bool IsDirectoryExists = System.IO.Directory.Exists(@"\wwwroot\images");
+            Console.WriteLine();
+
+
             if (response != null)
             {
                 questions = response.Select(dto => new QuestionVM
                     {
                         Question = dto.Question,
                         IsMultipleAnswer = dto.Options != null,
+                        HasMedia = dto.HasMedia,
+                        MediaId = dto.MediaId,
                         Options = dto.Options?.Select(option => new OptionVM
                         {
                             Text = option,
@@ -150,72 +167,108 @@
 
                 foreach (var question in questions)
                 {
+                    if (question.HasMedia)
+                    {
+                        var fetchMediaResponse = await FetchMedia(question.MediaId);
+
+                        mediaList.Add(new FetchMediaDto()
+                        {
+                            MediaPath = fetchMediaResponse.MediaPath,
+                            MediaType = fetchMediaResponse.MediaType
+                        });
+                    }
+                    else
+                    {
+                        mediaList.Add(new FetchMediaDto()
+                        {
+                            MediaPath = "",
+                            MediaType = ""
+                        });
+                    }
                     foreach (var option in question.Options)
                     {
                         // Set IsCorrect based on whether the option is in the CorrectOptions list
                         option.IsCorrect = question.Answer.Contains(option.Text);
                     }
                 }
+                Console.WriteLine(mediaList.Count);
             }
             else
             {
                 Console.WriteLine("Error: Unable to fetch quiz questions.");
             }
 
-            // SCORE CODE
-            var scoreUrl = $"https://localhost:7060/api/score/{qId}";
-            var scoresResponse = await HttpClient.GetFromJsonAsync<List<QuizLeaderboardVM>>(scoreUrl);
+            await GetHighSores();
 
-            if (scoresResponse != null)
-            {
-                scores = scoresResponse.Select(dto => new QuizLeaderboardVM
-                {
-                    Username = dto.Username,
-                    Score = dto.Score
-                }).ToList();
-            }
-            else
-            {
-                Console.WriteLine("Error: Unable to fetch quiz questions.");
-            }
-            // MEDIA CODE
-            foreach (var question in questions)
-            {
-                if (question.HasMedia)
-                {
-                    await FetchMedia(question.Id); // Fetch media for questions with media
-                }
-            }
+            // // SCORE CODE
+            // var scoreUrl = $"https://localhost:7060/api/score/{qId}";
+            // var scoresResponse = await HttpClient.GetFromJsonAsync<List<QuizLeaderboardVM>>(scoreUrl);
+
+            // if (scoresResponse != null)
+            // {
+            //     scores = scoresResponse.Select(dto => new QuizLeaderboardVM
+            //     {
+            //         Username = dto.Username,
+            //         Score = dto.Score
+            //     }).ToList();
+            // }
+            // else
+            // {
+            //     Console.WriteLine("Error: Unable to fetch quiz questions.");
+            // }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
         }
-        timeRemaining = int.Parse(quizTimeLimitMin)*60;
-        timer = new System.Threading.Timer(TimerCallback, null, 1000, 1000);
+        // timeRemaining = int.Parse(quizTimeLimitMin)*60;
+        // timer = new System.Threading.Timer(TimerCallback, null, 1000, 1000);
     }
-    private void TimerCallback(object state)
+    // private void TimerCallback(object state)
+    // {
+    //     // Decrement the time remaining
+    //     if (timeRemaining > 0)
+    //     {
+    //         timeRemaining--;
+    //         StateHasChanged();
+    //     }
+    //     if (scoreSubmitted || state == null)
+    //     {
+    //         // All answers submitted or timer is null, stops the timer
+    //         ((System.Threading.Timer)state)?.Dispose(); // Stop the timer
+    //     }
+    //     else if (timeRemaining <= 0)
+    //     {
+    //         // Timer expired, stops the timer
+    //         ((System.Threading.Timer)state)?.Dispose(); // Stop the timer
+    //         currentIndex = questions.Count;
+    //         StateHasChanged(); // Ensure the component re-renders
+    //     }
+    // }
+
+    private async Task GetHighSores()
     {
-        // Decrement the time remaining
-        if (timeRemaining > 0)
+        try
         {
-            timeRemaining--;
-            StateHasChanged();
+            Guid quizIdGuid = Guid.Parse(quizId);
+            var scoreUrl = $"https://localhost:7060/api/score/{quizIdGuid}";
+            var scoresResponse = await HttpClient.GetFromJsonAsync<List<QuizLeaderboardVM>>(scoreUrl);
+
+            if (scoresResponse is not null)
+            {
+                foreach (var item in scoresResponse)
+                {
+                    scores.Add(item);
+                }
+            }
         }
-        if (scoreSubmitted || state == null)
+        catch (Exception ex)
         {
-            // All answers submitted or timer is null, stops the timer
-            ((System.Threading.Timer)state)?.Dispose(); // Stop the timer
-        }
-        else if (timeRemaining <= 0)
-        {
-            // Timer expired, stops the timer
-            ((System.Threading.Timer)state)?.Dispose(); // Stop the timer
-            currentIndex = questions.Count;
-            StateHasChanged(); // Ensure the component re-renders
+            Console.WriteLine("GetHighSores Error: " + ex.Message);
         }
     }
-    private async Task LogScore()
+
+    private async Task PostScore()
     {
         Guid qId = Guid.Parse(quizId);
         var jwtToken = await _localStorageService.GetItemAsync<string>("JwtToken");
@@ -255,13 +308,13 @@
 
         return score;
     }
-    private void SubmitAnswer()
+    private async Task SubmitAnswer()
     {
-        if (timeRemaining <= 0)
-        {
-            // Timer expired, handle accordingly (e.g., disable answer submission)
-            return;
-        }
+        // if (timeRemaining <= 0)
+        // {
+        //     // Timer expired, handle accordingly (e.g., disable answer submission)
+        //     return;
+        // }
         // Check if there are more questions
         if (currentIndex < questions.Count)
         {
@@ -284,6 +337,6 @@
 
         // Calculate the total score when there are no more questions
         totalScore = CalculateScore();
-        LogScore();
+        await PostScore();
     }
 }
