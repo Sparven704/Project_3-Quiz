@@ -39,8 +39,13 @@ namespace project_3_quiz_api.Controllers
                     MediaId = requestDto.MediaId
                 };
 
-                await _questionRepository.CreateAsync(newQuestion);
+                if (newQuestion.MediaId == Guid.Empty)
+                {
+                    newQuestion.MediaId = null;
+                }
 
+                await _questionRepository.CreateAsync(newQuestion);
+                //await Console.Out.WriteLineAsync("test");
                 if (newQuestion.IsMultipleAnswer is true)
                 {
                     foreach (var option in requestDto.Options)

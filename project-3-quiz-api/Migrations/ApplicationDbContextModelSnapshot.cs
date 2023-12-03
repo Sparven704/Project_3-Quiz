@@ -24,9 +24,8 @@ namespace project_3_quiz_api.Migrations
 
             modelBuilder.Entity("project_3_quiz_api.Models.DBModels.MediaModel", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("MediaType")
                         .IsRequired()
@@ -77,9 +76,9 @@ namespace project_3_quiz_api.Migrations
                     b.Property<bool>("IsMultipleAnswer")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("MediaId")
+                    b.Property<string>("MediaId")
                         .IsRequired()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Question")
                         .IsRequired()

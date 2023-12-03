@@ -32,9 +32,7 @@
                 </ul>
             }
             @if (questions[currentIndex].HasMedia)
-            {
-                <p>Loading media...</p>
-               
+            {  
                 @if (mediaList[currentIndex].MediaPath.Contains("image"))
                 {
                     <img src="@mediaList[currentIndex].MediaPath" alt="Image Media" style="Height: 300px;" />
@@ -44,7 +42,6 @@
                     <_PlayVideo VideoPath="@mediaList[currentIndex].MediaPath" VideoType="@mediaList[currentIndex].MediaType" ShowVideo=true />
                 }
             }
-            
             else
             {
                 <!-- Use a textbox for single-answer questions -->
@@ -145,6 +142,13 @@
             var url = $"https://localhost:7060/api/question/{qId}";
             var response = await HttpClient.GetFromJsonAsync<List<FetchQuizQuestionsResponseDto>>(url);
 
+            string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+            Console.WriteLine(currentDirectory);
+
+            bool IsDirectoryExists = System.IO.Directory.Exists(@"\wwwroot\images");
+            Console.WriteLine();
+
+
             if (response != null)
             {
                 questions = response.Select(dto => new QuestionVM
@@ -166,6 +170,7 @@
                     if (question.HasMedia)
                     {
                         var fetchMediaResponse = await FetchMedia(question.MediaId);
+
                         mediaList.Add(new FetchMediaDto()
                         {
                             MediaPath = fetchMediaResponse.MediaPath,
@@ -193,23 +198,24 @@
                 Console.WriteLine("Error: Unable to fetch quiz questions.");
             }
 
-            // SCORE CODE
-            var scoreUrl = $"https://localhost:7060/api/score/{qId}";
-            var scoresResponse = await HttpClient.GetFromJsonAsync<List<QuizLeaderboardVM>>(scoreUrl);
+            await GetHighSores();
 
-            if (scoresResponse != null)
-            {
-                scores = scoresResponse.Select(dto => new QuizLeaderboardVM
-                {
-                    Username = dto.Username,
-                    Score = dto.Score
-                }).ToList();
-            }
-            else
-            {
-                Console.WriteLine("Error: Unable to fetch quiz questions.");
-            }
-          
+            // // SCORE CODE
+            // var scoreUrl = $"https://localhost:7060/api/score/{qId}";
+            // var scoresResponse = await HttpClient.GetFromJsonAsync<List<QuizLeaderboardVM>>(scoreUrl);
+
+            // if (scoresResponse != null)
+            // {
+            //     scores = scoresResponse.Select(dto => new QuizLeaderboardVM
+            //     {
+            //         Username = dto.Username,
+            //         Score = dto.Score
+            //     }).ToList();
+            // }
+            // else
+            // {
+            //     Console.WriteLine("Error: Unable to fetch quiz questions.");
+            // }
         }
         catch (Exception ex)
         {
@@ -239,7 +245,30 @@
     //         StateHasChanged(); // Ensure the component re-renders
     //     }
     // }
-    private async Task LogScore()
+
+    private async Task GetHighSores()
+    {
+        try
+        {
+            Guid quizIdGuid = Guid.Parse(quizId);
+            var scoreUrl = $"https://localhost:7060/api/score/{quizIdGuid}";
+            var scoresResponse = await HttpClient.GetFromJsonAsync<List<QuizLeaderboardVM>>(scoreUrl);
+
+            if (scoresResponse is not null)
+            {
+                foreach (var item in scoresResponse)
+                {
+                    scores.Add(item);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("GetHighSores Error: " + ex.Message);
+        }
+    }
+
+    private async Task PostScore()
     {
         Guid qId = Guid.Parse(quizId);
         var jwtToken = await _localStorageService.GetItemAsync<string>("JwtToken");
@@ -279,13 +308,13 @@
 
         return score;
     }
-    private void SubmitAnswer()
+    private async Task SubmitAnswer()
     {
-        if (timeRemaining <= 0)
-        {
-            // Timer expired, handle accordingly (e.g., disable answer submission)
-            return;
-        }
+        // if (timeRemaining <= 0)
+        // {
+        //     // Timer expired, handle accordingly (e.g., disable answer submission)
+        //     return;
+        // }
         // Check if there are more questions
         if (currentIndex < questions.Count)
         {
@@ -308,6 +337,6 @@
 
         // Calculate the total score when there are no more questions
         totalScore = CalculateScore();
-        LogScore();
+        await PostScore();
     }
 }
